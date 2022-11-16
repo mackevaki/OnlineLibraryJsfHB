@@ -1,0 +1,118 @@
+body {
+    font-family: Verdana, Geneva, sans-serif;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: normal;
+    background-color: #FFF;
+    margin:100px;
+}
+.main {
+    background-color: antiquewhite;
+    width: 1000px;
+    height: 100%;
+    margin: 0 auto;
+    padding: 20px;	
+}
+.content {
+
+}
+.title {
+    color: crimson;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+}
+.text {
+    color: #8e3c40;
+    padding-left: 100px;
+    padding-right: 100px;
+}
+.login_form{
+    padding-left: 50px;
+    text-align: center;
+    padding: 20px;
+    padding-bottom: 10px;
+}
+
+.login_div {
+    width:350px;
+    border: solid 1px palevioletred;
+    color: #8e3c40;
+    margin: 0 auto;
+    padding: 10px;
+}
+.entry {
+    margin-top: 50px;
+    color: #009999;
+    text-align: center;
+    font-size: 14px;
+    font-weight: bold;
+}
+.footer {
+    color: darksalmon;
+    height: 50px;
+    text-align: center;
+    margin:50px;
+}
+.error {
+    color: #009999;
+    font-style: italic;
+    font-size: 12px;
+}
+.locales{
+    width: 100%;
+    margin:0 auto;
+    text-align: center;
+    height: 40px;
+}
+.locales a{
+    margin-right: 15px;
+    font-size: 10px;
+}
+.login_button {
+	box-shadow: inset 0px 1px 0px 0px #f7c5c0;
+	background: linear-gradient(to bottom, #fc8d83 5%, #e4685d 100%);
+	background-color: #fc8d83;
+	border-radius: 6px;
+	border: 1px solid #d83526;
+	display: inline-block;
+	cursor: pointer;
+	color: #ffffff;
+	font-family: Verdana;
+	font-size: 15px;
+	padding: 5px 12px;
+	text-decoration: none;
+	text-shadow: 0px 1px 0px #b23e35;
+        margin: 4px;
+}
+.login_button:hover {
+	background: linear-gradient(to bottom, #e4685d 5%, #fc8d83 100%);
+	background-color: #e4685d;
+        cursor: pointer;
+}
+.auth_input {
+    width: 80px;
+    float: left;
+    text-align: left;
+}
+#loading_wrapper {
+    flex: 10%;
+    display: none;
+}
+#loading_wrapper p img {
+    height: 20px;
+    width: 20px;
+}
+.auth_input {
+    width: 80px;
+    float: left;
+    text-align: left;
+}
+#loading_wrapper {
+    flex: 10%;
+    display: none;
+}
+#loading_wrapper p img {
+    height: 20px;
+    width: 20px;
+}
