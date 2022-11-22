@@ -1,10 +1,12 @@
 package db;
 
+import beans.Pager;
 import entity.Author;
 import entity.Book;
 import entity.Genre;
 import entity.HibernateUtil;
 import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
@@ -17,35 +19,70 @@ public class DataHelper {
 
     private SessionFactory sessionFactory = null;
     private static DataHelper dataHelper;
+    private Pager currentPager;
 
+    private SavedCriteria<Book> currentCriteria;
+    
     private DataHelper() {
         sessionFactory = HibernateUtil.getSessionFactory();
     }
 
     public static DataHelper getInstance() {
-        return dataHelper == null ? new DataHelper() : dataHelper;
+        if (dataHelper == null) {
+            dataHelper = new DataHelper();
+        }
+        return dataHelper;
     }
 
     private Session getSession() {
         return sessionFactory.getCurrentSession();
     }
    
-    public List<Book> getAllBooks() {
+    public void runCurrentCriteria() {
+        Session session = getSession();
+        if (!session.getTransaction().isActive()) {
+            session.beginTransaction();
+        }
+        CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
+        CriteriaQuery<Book> criteriaQuery = criteriaBuilder.createQuery(Book.class);
+        Root<Book> from = criteriaQuery.from(Book.class);
+        CriteriaQuery<Book> select;
+                
+        select = currentCriteria.getCriteriaQuery(from, criteriaQuery, criteriaBuilder).orderBy(criteriaBuilder.asc(from.get("name")));
+        
+        TypedQuery<Book> typedQuery = session.createQuery(select);
+        typedQuery.setFirstResult(currentPager.getFrom());
+        typedQuery.setMaxResults(currentPager.getTo());
+        
+        List<Book> list = typedQuery.getResultList();
+        
+        currentPager.setList(list);
+        
+        if (session.getTransaction().isActive()) {
+            session.getTransaction().commit();
+        }
+    }
+    
+    public void getAllBooks(Pager pager) {
+        currentPager = pager;
+        
         Session session = getSession();
         Transaction tx = session.beginTransaction();
         
-        CriteriaBuilder cb = session.getCriteriaBuilder();
-        CriteriaQuery<Book> cq = cb.createQuery(Book.class);
+        CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
         
-        Root<Book> root = cq.from(Book.class);
-        cq.select(root);
+        CriteriaQuery<Long> countQuery = criteriaBuilder.createQuery(Long.class);
+        countQuery.select(criteriaBuilder.count(countQuery.from(Book.class)));
+        Long count = session.createQuery(countQuery).getSingleResult();
         
-        Query query = session.createQuery(cq);
-        List<Book> list = query.getResultList();
-        
-        tx.commit();
-        
-        return list;
+        currentPager.setTotalBooksCount(count);
+
+        currentCriteria = (root, query, cb) -> {return query.select(root);};
+      
+        runCurrentCriteria();
+        if (session.getTransaction().isActive()) {
+            session.getTransaction().commit();
+        }
     }
 
     public List<Genre> getAllGenres() {
@@ -84,76 +121,108 @@ public class DataHelper {
         return list;
     }
 
-    public List<Book> getBooksByGenre(Long genreId) {
+    public void getBooksByGenre(Long genreId, Pager pager) {
+        currentPager = pager;        
+        
         Session session = getSession();
         Transaction tx = session.beginTransaction();
         
-        CriteriaBuilder cb = session.getCriteriaBuilder();
-        CriteriaQuery<Book> cq = cb.createQuery(Book.class);
-        Root<Book> root = cq.from(Book.class);
+        currentCriteria = (root, query, cb) -> {return query.select(root).where(cb.equal(root.get("genre").get("id"), genreId));};
         
-        cq.select(root).where(cb.equal(root.get("genre").get("id"), genreId)).orderBy(cb.asc(root.get("name")));
+        CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
+
+        CriteriaQuery q = criteriaBuilder.createQuery();
+        Root<Book> root = q.from(Book.class);
         
-        Query query = session.createQuery(cq);
-        List<Book> list = query.getResultList();
-                
-        tx.commit();
+        q.select(criteriaBuilder.count(root));
+        q.where(criteriaBuilder.equal(root.get("genre").get("id"), genreId));
+        CriteriaQuery<Long> qcount = q;
+        Long count = session.createQuery(qcount).getSingleResult();
         
-        return list;
+        currentPager.setTotalBooksCount(count);
+
+        runCurrentCriteria();
+        if (session.getTransaction().isActive()) {
+            session.getTransaction().commit();
+        }
     }
 
-    public List<Book> getBooksByLetter(Character letter) {
+    public void getBooksByLetter(Character letter, Pager pager) {
+        currentPager = pager;
+        
         Session session = getSession();
         Transaction tx = session.beginTransaction();
         
-        CriteriaBuilder cb = session.getCriteriaBuilder();
-        CriteriaQuery<Book> cq = cb.createQuery(Book.class);
-        Root<Book> root = cq.from(Book.class);
+        currentCriteria = (root, query, cb) -> {return query.select(root).where(cb.like(cb.lower(root.get("name")), letter.toString().toLowerCase() + "%"));};
         
-        cq.select(root).where(cb.like(cb.lower(root.get("name")), letter.toString().toLowerCase() + "%")).orderBy(cb.asc(root.get("name")));
+        CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
+       
+        CriteriaQuery q = criteriaBuilder.createQuery();
+        Root<Book> root = q.from(Book.class);
         
-        Query query = session.createQuery(cq);
-        List<Book> list = query.getResultList();
-                
-        tx.commit();
+        q.select(criteriaBuilder.count(root));
+        q.where(criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), letter.toString().toLowerCase() + "%"));
+        CriteriaQuery<Long> qcount = q;
+        Long count = session.createQuery(qcount).getSingleResult();
         
-        return list; 
+        currentPager.setTotalBooksCount(count);
+
+        runCurrentCriteria();
+        if (session.getTransaction().isActive()) {
+            session.getTransaction().commit();
+        }
     }
 
-    public List<Book> getBooksByAuthor(String authorName) {
+    public void getBooksByAuthor(String authorName, Pager pager) {
+        currentPager = pager;
+        
         Session session = getSession();
         Transaction tx = session.beginTransaction();
         
-        CriteriaBuilder cb = session.getCriteriaBuilder();
-        CriteriaQuery<Book> cq = cb.createQuery(Book.class);
-        Root<Book> root = cq.from(Book.class);
+        currentCriteria = (root, query, cb) -> {return query.select(root).where(cb.like(cb.lower(root.get("author").get("fio")), "%" + authorName.toLowerCase() + "%"));};
         
-        cq.select(root).where(cb.like(cb.lower(root.get("author").get("fio")), "%" + authorName.toLowerCase() + "%")).orderBy(cb.asc(root.get("name")));
+        CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
         
-        Query query = session.createQuery(cq);
-        List<Book> list = query.getResultList();
-                
-        tx.commit();
+        CriteriaQuery q = criteriaBuilder.createQuery();
+        Root<Book> root = q.from(Book.class);
         
-        return list; 
+        q.select(criteriaBuilder.count(root));
+        q.where(criteriaBuilder.like(criteriaBuilder.lower(root.get("author").get("fio")), "%" + authorName.toLowerCase() + "%"));
+        CriteriaQuery<Long> qcount = q;
+        Long count = session.createQuery(qcount).getSingleResult();
+        
+        currentPager.setTotalBooksCount(count);
+        
+        runCurrentCriteria();
+        if (session.getTransaction().isActive()) {
+            session.getTransaction().commit();
+        }
     }
 
-    public List<Book> getBooksByName(String bookName) {
+    public void getBooksByName(String bookName, Pager pager) {
+        currentPager = pager;
+        
         Session session = getSession();
         Transaction tx = session.beginTransaction();
         
-        CriteriaBuilder cb = session.getCriteriaBuilder();
-        CriteriaQuery<Book> cq = cb.createQuery(Book.class);
-        Root<Book> root = cq.from(Book.class);
+        currentCriteria = (root, query, cb) -> {return query.select(root).where(cb.like(cb.lower(root.get("name")), "%" + bookName.toLowerCase() + "%"));};
         
-        cq.select(root).where(cb.like(cb.lower(root.get("name")), "%" + bookName.toLowerCase() + "%")).orderBy(cb.asc(root.get("name")));
+        CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
         
-        Query query = session.createQuery(cq);
-        List<Book> list = query.getResultList();
-                
-        tx.commit();
+        CriteriaQuery q = criteriaBuilder.createQuery();
+        Root<Book> root = q.from(Book.class);
         
-        return list; 
+        q.select(criteriaBuilder.count(root));
+        q.where(criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), "%" + bookName.toLowerCase() + "%"));
+        CriteriaQuery<Long> qcount = q;
+        Long count = session.createQuery(qcount).getSingleResult();
+        
+        currentPager.setTotalBooksCount(count);
+        
+        runCurrentCriteria();
+        if (session.getTransaction().isActive()) {
+            session.getTransaction().commit();
+        }
     }
 
     public byte[] getContent(Long id) {
@@ -172,4 +241,7 @@ public class DataHelper {
         return (Author) getSession().get(Author.class, id);
     }
 
+    public void setCurrentPager(Pager currentPager) {
+        this.currentPager = currentPager;
+    }
 }

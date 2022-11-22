@@ -1,6 +1,9 @@
 package servlets;
 
+import controllers.BookListController;
 import db.DataHelper;
+import entity.Book;
+import jakarta.inject.Inject;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,7 +13,8 @@ import java.io.OutputStream;
 
 
 public class ShowImage extends HttpServlet {
-
+    @Inject
+    BookListController bookListController;
     
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -25,9 +29,8 @@ public class ShowImage extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("image/jpeg");
         try (OutputStream out = response.getOutputStream()) {
-            long id = Long.valueOf(request.getParameter("id"));           
-            byte[] image = DataHelper.getInstance().getImage(id);
-            
+            int index = Integer.valueOf(request.getParameter("index"));           
+            byte[] image = ((Book)bookListController.getPager().getList().get(index)).getImage(); 
             response.setContentLength(image.length);
             out.write(image);
         }        

@@ -11,7 +11,7 @@ import org.omnifaces.cdi.Eager;
 
 @Named
 @ApplicationScoped
-@Eager
+//@Eager
 public class GenreController implements Serializable {
     private List<Genre> genreList; //= new ArrayList<>();
     

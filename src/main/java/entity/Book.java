@@ -40,13 +40,13 @@ public class Book implements Serializable{
     @Basic
     @Column(name = "descr", nullable = true, length = 5000)
     private String descr;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "genre_id", referencedColumnName = "id", nullable = false)
     private Genre genre;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "author_id", referencedColumnName = "id", nullable = false)
     private Author author;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "publisher_id", referencedColumnName = "id", nullable = false)
     private Publisher publisher;
 

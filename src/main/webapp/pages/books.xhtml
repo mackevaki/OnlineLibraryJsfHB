@@ -10,7 +10,7 @@
     <h:body>
         <ui:composition template="/templates/library_template.xhtml">
             <ui:define name="books_count">
-                <h:outputText value="#{msg.book_count} #{bookListController.currentBookList.size()}" id="booksCount"></h:outputText>
+                <h:outputText value="#{msg.book_count} #{bookListController.pager.totalBooksCount}" id="booksCount"></h:outputText>
             </ui:define>
             
             <ui:define name="title">
@@ -39,10 +39,10 @@
                         </h:commandButton>                        
                     </h:panelGroup>    
                     
-                    <h:dataTable id="booksList" value="#{bookListController.currentBookList}" var="b" cellspacing="10px" columnClasses="col1, col2, col3"> 
+                    <h:dataTable id="booksList" value="#{bookListController.pager.list}" var="b" cellspacing="10px" columnClasses="col1, col2, col3"> 
                         <h:column>
                             <h:outputLink value="#{request.contextPath}/PdfContent?id=#{b.id}" target="_blank">
-                                <h:graphicImage value="/ShowImage?id=#{b.id}" width="120" height="160"/>
+                                <h:graphicImage value="/ShowImage?index=#{bookListController.row}" width="120" height="160"/>
                             </h:outputLink>
                         </h:column>
                         <h:column>
@@ -114,8 +114,8 @@
             </ui:define>
 
             <ui:define name="paginator">
-                <h:form rendered="#{bookListController.totalBooksCount>bookListController.booksOnPage}">
-                    <h:selectOneMenu styleClass="books_on_page_dropdown" value="#{bookListController.booksOnPage}" valueChangeListener="#{bookListController.booksOnPageChanged}">
+                <h:form rendered="#{bookListController.pager.totalBooksCount>0}">
+                    <h:selectOneMenu styleClass="books_on_page_dropdown" value="#{bookListController.pager.booksOnPage}" valueChangeListener="#{bookListController.booksOnPageChanged}">
                         <f:selectItem itemValue="5"/>
                         <f:selectItem itemValue="10"/>
                         <f:selectItem itemValue="30"/>
@@ -124,8 +124,10 @@
                     </h:selectOneMenu>
                     
                     #{msg.pager}
-                    <ui:repeat value="#{bookListController.pageNumbers}" var="pageNumber" >
-                        <h:commandLink value="#{pageNumber}" styleClass="#{pageNumber == bookListController.selectedPageNumber ? 'selected_page':''}">
+                    <ui:repeat value="#{bookListController.pager.pageNumbers}" var="pageNumber" >
+                        <h:outputText value="#{pageNumber}" rendered="#{pageNumber == bookListController.pager.selectedPageNumber}" styleClass="selected_page"/>
+            
+                        <h:commandLink value="#{pageNumber}" rendered="#{pageNumber != bookListController.pager.selectedPageNumber}" styleClass="page_number">
                             <f:param name="page_number" value="#{pageNumber}" />
                             <f:ajax onevent="showProgress" event="click" render=":booksForm :booksForm:booksList :pages1 :pages2" listener="#{bookListController.selectPage()}"/>
                         </h:commandLink>
