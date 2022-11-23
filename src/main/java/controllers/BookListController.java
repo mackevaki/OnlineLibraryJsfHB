@@ -56,6 +56,8 @@ public class BookListController implements Serializable {
         
         immitateLoading();
         
+        cancelEdit();
+        
         Map<String, String> params = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
         
         submitValues(' ', 1, Integer.valueOf(params.get("genre_id")));
@@ -69,6 +71,8 @@ public class BookListController implements Serializable {
         row = -1;
         
         immitateLoading();
+        
+        cancelEdit();
         
         Map<String, String> params = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
         selectedLetter = params.get("letter").charAt(0);
@@ -85,6 +89,8 @@ public class BookListController implements Serializable {
         
         immitateLoading();
         
+        cancelEdit();
+                
         submitValues(' ', 1, -1);
         
         if (searchString.trim().length() == 0) {
@@ -106,16 +112,22 @@ public class BookListController implements Serializable {
     
     public String updateBooks() {
         immitateLoading();
-
+        
+        row = -1;
+        
+        DataHelper.getInstance().update();
+        
         cancelEdit();
         return "books";
     }
     
     public void showEdit() {
+        row = -1;
         editModeView = true;
     }
         
     public void cancelEdit() {
+        row = -1;   
         editModeView = false;
         for (Book b : pager.getList()) {
             b.setEdit(false);
@@ -129,7 +141,6 @@ public class BookListController implements Serializable {
         return letters;
     }
 //<editor-fold defaultstate="collapsed" desc="pager">
-    private DataHelper dh = DataHelper.getInstance();
     
     public void selectPage() {
         row = -1;
@@ -138,8 +149,8 @@ public class BookListController implements Serializable {
         Map<String, String> params = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
         pager.setSelectedPageNumber(Integer.parseInt(params.get("page_number")));
 
-        dh.setCurrentPager(pager);
-        dh.runCurrentCriteria();
+        DataHelper.getInstance().setCurrentPager(pager);
+        DataHelper.getInstance().runCurrentCriteria();
     }
     
     public void booksOnPageChanged(ValueChangeEvent e) {
@@ -148,8 +159,8 @@ public class BookListController implements Serializable {
         pager.setBooksOnPage(Integer.parseInt(e.getNewValue().toString()));
         pager.setSelectedPageNumber(1);
 
-        dh.setCurrentPager(pager);
-        dh.runCurrentCriteria();//        DataHelper.getInstance().runCurrentCriteria();
+        DataHelper.getInstance().setCurrentPager(pager);
+        DataHelper.getInstance().runCurrentCriteria();//        DataHelper.getInstance().runCurrentCriteria();
     }
 //</editor-fold>
    

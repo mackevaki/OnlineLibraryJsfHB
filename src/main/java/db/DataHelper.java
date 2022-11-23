@@ -9,6 +9,7 @@ import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.CriteriaUpdate;
 import jakarta.persistence.criteria.Root;
 import java.util.List;
 import org.hibernate.Session;
@@ -225,6 +226,25 @@ public class DataHelper {
         }
     }
 
+    public void update() {
+        Session session = sessionFactory.openSession();
+        Transaction tx = session.beginTransaction();
+        
+//        CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
+//        CriteriaUpdate<Book> criteriaUpdate = criteriaBuilder.createCriteriaUpdate(Book.class);
+//        Root<Book> root = criteriaUpdate.from(Book.class);
+        
+        for(Object object : currentPager.getList()) {
+            Book book = (Book) object;
+            if(book.isEdit()) {
+                session.merge(book);
+            }
+        }
+        
+        tx.commit();
+        session.close();
+    }
+    
     public byte[] getContent(Long id) {
         try (Session session = sessionFactory.openSession();) {
             return (byte[]) session.get(Book.class, id).getContent();

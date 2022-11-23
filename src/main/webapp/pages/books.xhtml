@@ -20,31 +20,29 @@
             <ui:define name="content">
                 <h:form id="booksForm">
                     <h:panelGroup id ="admin_tools" rendered="#{request.isUserInRole('ADMIN')}">  
-                        <h:commandLink rendered="#{!bookListController.editModeView}">
-                            <h:graphicImage library="images" name="add.jpg" />
-                            <h:outputText value="#{msg.add_book}"></h:outputText>
-                            <f:ajax onevent="showProgress" execute="@form" render="@form" />
-                        </h:commandLink>  
-                        <h:commandLink action="#{bookListController.showEdit()}" rendered="#{!bookListController.editModeView}">
-                            <h:graphicImage library="images" name="edit.jpg"/>
-                            <h:outputText value="#{msg.edit}"></h:outputText>
-                            <f:ajax onevent="showProgress" execute="@form" render="@form"/>
-                        </h:commandLink>
-                        
-                        <h:commandButton action="#{bookListController.updateBooks()}" value="#{msg.save}" rendered="#{bookListController.editModeView}">
-                            <f:ajax onevent="showProgress" execute="@form" render="@form" />
-                        </h:commandButton>  
-                        <h:commandButton  immediate="true" value="#{msg.cancel}" action="#{bookListController.cancelEdit()}" rendered="#{bookListController.editModeView}">
-                            <f:ajax onevent="showProgress" execute="@form" render="@form"/>
-                        </h:commandButton>                        
+                        <f:ajax onevent="showProgress" execute="@form" render="@form" onerror="showError">
+                            <h:commandLink rendered="#{!bookListController.editModeView}">
+                                <h:graphicImage library="images" name="add.jpg" />
+                                <h:outputText value="#{msg.add_book}"></h:outputText>
+                            </h:commandLink>  
+                            <h:commandLink action="#{bookListController.showEdit()}" rendered="#{!bookListController.editModeView}">
+                                <h:graphicImage library="images" name="edit.jpg"/>
+                                <h:outputText value="#{msg.edit}"></h:outputText>
+                            </h:commandLink>
+
+                            <h:commandButton action="#{bookListController.updateBooks()}" value="#{msg.save}" rendered="#{bookListController.editModeView}"/>
+                            <h:commandButton  immediate="true" value="#{msg.cancel}" action="#{bookListController.cancelEdit()}" rendered="#{bookListController.editModeView}"/>
+                        </f:ajax>    
                     </h:panelGroup>    
                     
                     <h:dataTable id="booksList" value="#{bookListController.pager.list}" var="b" cellspacing="10px" columnClasses="col1, col2, col3"> 
                         <h:column>
                             <h:outputLink value="#{request.contextPath}/PdfContent?id=#{b.id}" target="_blank">
                                 <h:graphicImage value="/ShowImage?index=#{bookListController.row}" width="120" height="160"/>
+                                <f:param name="id" value="#{b.id}"/>
                             </h:outputLink>
                         </h:column>
+                        
                         <h:column>
                             <div class="book_info">
                                 <p> 
@@ -57,7 +55,10 @@
                                 <p>
                                     <strong>#{msg.author_name}: </strong>
                                     <h:outputText value="#{b.author.fio}" rendered="#{!b.edit}"/>
-                                    <h:inputText value="#{b.author.fio}" styleClass="name_edit" rendered="#{bookListController.editModeView and b.edit}"/>                                
+                                    <!--<h:inputText value="#{b.author.fio}" styleClass="name_edit" rendered="#{bookListController.editModeView and b.edit}"/>-->                                
+                                    <h:selectOneMenu rendered="#{b.edit}" value="#{b.author}" converter="#{authorController}">
+                                        <f:selectItems value="${authorController.selectItems}"/>
+                                    </h:selectOneMenu>
                                 </p>                           
                                 <p>
                                     <strong>#{msg.page_count}: </strong>
@@ -80,21 +81,26 @@
                                     <h:inputText value="#{b.isbn}" styleClass="isbn_edit" rendered="#{bookListController.editModeView and b.edit}"/>                  
                                 </p>
                                 <p>
-                                    <h:graphicImage library="images" name="book.gif" />
-                                    <h:outputLink styleClass="content_link" value="#{request.contextPath}/PdfContent"  target="_blank">
-                                        <h:outputText value="#{msg.read}"></h:outputText>
-                                        <f:param name="id" value="#{b.id}" />                        
-                                    </h:outputLink>                           
-                                    <h:graphicImage library="images" name="download.png" />
-                                    <h:outputLink styleClass="save_link" value="#{request.contextPath}/PdfContent" target="_blank"> 
-                                        <h:outputText value="#{msg.download}"></h:outputText>
-                                        <f:param name="id" value="#{b.id}" />
-                                        <f:param name="filename" value="#{b.name}" />
-                                        <f:param name="save" value="true" />
-                                    </h:outputLink>
+                                    <h:panelGroup rendered="#{!bookListController.editModeView}">
+                                        
+                                        <h:outputLink styleClass="content_link" value="#{request.contextPath}/PdfContent"  target="_blank">
+                                            <h:graphicImage library="images" name="book.gif" />
+                                            <h:outputText value="#{msg.read}"></h:outputText>
+                                            <f:param name="id" value="#{b.id}" />                        
+                                        </h:outputLink>                           
+                                        
+                                        <h:outputLink styleClass="save_link" value="#{request.contextPath}/PdfContent" target="_blank"> 
+                                            <h:graphicImage library="images" name="download.png" />
+                                            <h:outputText value="#{msg.download}"></h:outputText>
+                                            <f:param name="id" value="#{b.id}" />
+                                            <f:param name="filename" value="#{b.name}" />
+                                            <f:param name="save" value="true" />
+                                        </h:outputLink>
+                                    </h:panelGroup>
                                 </p>    
                             </div>
                         </h:column>
+                        
                         <h:column>
                             <div class="book_details">
                                 <p><strong>#{msg.descr}</strong></p>

@@ -17,3 +17,7 @@ function showProgress(data) {
         document.getElementById('loading_wrapper').style.display = "none";
     }
 }
+
+function showError(error) {
+     alert(error.description);
+}
