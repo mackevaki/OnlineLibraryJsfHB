@@ -9,8 +9,8 @@ import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.CriteriaUpdate;
 import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Selection;
 import java.util.List;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -23,7 +23,7 @@ public class DataHelper {
     private Pager currentPager;
 
     private SavedCriteria<Book> currentCriteria;
-    
+        
     private DataHelper() {
         sessionFactory = HibernateUtil.getSessionFactory();
     }
@@ -49,7 +49,9 @@ public class DataHelper {
         Root<Book> from = criteriaQuery.from(Book.class);
         CriteriaQuery<Book> select;
                 
-        select = currentCriteria.getCriteriaQuery(from, criteriaQuery, criteriaBuilder).orderBy(criteriaBuilder.asc(from.get("name")));
+        Selection[] selection = {from.get("id").alias("id"), from.get("name").alias("name"), from.get("image").alias("image"), from.get("genre").alias("genre"), from.get("pageCount").alias("pageCount"), from.get("isbn").alias("isbn"), from.get("publisher").alias("publisher"), from.get("author").alias("author"), from.get("publishDate").alias("publishDate"), from.get("descr").alias("descr")};
+        
+        select = currentCriteria.getCriteriaQuery(criteriaBuilder.construct(Book.class, selection), from, criteriaQuery, criteriaBuilder).orderBy(criteriaBuilder.asc(from.get("name")));
         
         TypedQuery<Book> typedQuery = session.createQuery(select);
         typedQuery.setFirstResult(currentPager.getFrom());
@@ -78,7 +80,7 @@ public class DataHelper {
         
         currentPager.setTotalBooksCount(count);
 
-        currentCriteria = (root, query, cb) -> {return query.select(root);};
+        currentCriteria = (selectionRoot, root, query, cb) -> {return query.select(selectionRoot);};
       
         runCurrentCriteria();
         if (session.getTransaction().isActive()) {
@@ -128,7 +130,7 @@ public class DataHelper {
         Session session = getSession();
         Transaction tx = session.beginTransaction();
         
-        currentCriteria = (root, query, cb) -> {return query.select(root).where(cb.equal(root.get("genre").get("id"), genreId));};
+        currentCriteria = (selectionRoot, root, query, cb) -> {return query.select(selectionRoot).where(cb.equal(root.get("genre").get("id"), genreId));};
         
         CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
 
@@ -154,7 +156,7 @@ public class DataHelper {
         Session session = getSession();
         Transaction tx = session.beginTransaction();
         
-        currentCriteria = (root, query, cb) -> {return query.select(root).where(cb.like(cb.lower(root.get("name")), letter.toString().toLowerCase() + "%"));};
+        currentCriteria = (selectionRoot, root, query, cb) -> {return query.select(selectionRoot).where(cb.like(cb.lower(root.get("name")), letter.toString().toLowerCase() + "%"));};
         
         CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
        
@@ -180,7 +182,7 @@ public class DataHelper {
         Session session = getSession();
         Transaction tx = session.beginTransaction();
         
-        currentCriteria = (root, query, cb) -> {return query.select(root).where(cb.like(cb.lower(root.get("author").get("fio")), "%" + authorName.toLowerCase() + "%"));};
+        currentCriteria = (selectionRoot, root, query, cb) -> {return query.select(selectionRoot).where(cb.like(cb.lower(root.get("author").get("fio")), "%" + authorName.toLowerCase() + "%"));};
         
         CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
         
@@ -206,7 +208,7 @@ public class DataHelper {
         Session session = getSession();
         Transaction tx = session.beginTransaction();
         
-        currentCriteria = (root, query, cb) -> {return query.select(root).where(cb.like(cb.lower(root.get("name")), "%" + bookName.toLowerCase() + "%"));};
+        currentCriteria = (selectionRoot, root, query, cb) -> {return query.select(selectionRoot).where(cb.like(cb.lower(root.get("name")), "%" + bookName.toLowerCase() + "%"));};
         
         CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
         
@@ -230,13 +232,10 @@ public class DataHelper {
         Session session = sessionFactory.openSession();
         Transaction tx = session.beginTransaction();
         
-//        CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
-//        CriteriaUpdate<Book> criteriaUpdate = criteriaBuilder.createCriteriaUpdate(Book.class);
-//        Root<Book> root = criteriaUpdate.from(Book.class);
-        
         for(Object object : currentPager.getList()) {
             Book book = (Book) object;
             if(book.isEdit()) {
+                book.setEdit(false);
                 session.merge(book);
             }
         }

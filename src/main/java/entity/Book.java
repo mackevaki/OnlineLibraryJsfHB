@@ -3,8 +3,14 @@ package entity;
 import jakarta.persistence.*;
 import java.io.Serializable;
 import java.util.Arrays;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@RequiredArgsConstructor
 public class Book implements Serializable{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
@@ -49,9 +55,8 @@ public class Book implements Serializable{
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "publisher_id", referencedColumnName = "id", nullable = false)
     private Publisher publisher;
-
     private boolean edit;
-
+    
     public boolean isEdit() {
         return edit;
     }

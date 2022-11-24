@@ -1,7 +1,6 @@
 package servlets;
 
 import controllers.BookListController;
-import db.DataHelper;
 import entity.Book;
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletException;
