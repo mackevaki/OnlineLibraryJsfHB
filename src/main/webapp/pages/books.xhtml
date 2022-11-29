@@ -3,7 +3,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:f="http://xmlns.jcp.org/jsf/core">
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
     <head>
         <title>Онлайн библиотека</title>
     </head>
@@ -20,12 +21,12 @@
             <ui:define name="content">
                 <h:form id="booksForm">
                     <h:panelGroup id ="admin_tools" rendered="#{request.isUserInRole('ADMIN')}">  
-                        <f:ajax onevent="showProgress" execute="@form" render="@form" onerror="showError">
+                        <f:ajax onevent="showProgress" execute="@form" render="@form :pages1 :pages2 :booksCount" onerror="showError">
                             <h:commandLink rendered="#{!bookListController.editModeView}">
                                 <h:graphicImage library="images" name="add.jpg" />
                                 <h:outputText value="#{msg.add_book}"></h:outputText>
                             </h:commandLink>  
-                            <h:commandLink action="#{bookListController.showEdit()}" rendered="#{!bookListController.editModeView}">
+                            <h:commandLink action="#{bookListController.showEdit()}" rendered="#{!bookListController.editModeView and bookListController.pager.totalBooksCount>0}">
                                 <h:graphicImage library="images" name="edit.jpg"/>
                                 <h:outputText value="#{msg.edit}"></h:outputText>
                             </h:commandLink>
@@ -59,16 +60,27 @@
                                     <h:selectOneMenu rendered="#{b.edit}" value="#{b.author}" converter="#{authorController}">
                                         <f:selectItems value="${authorController.selectItems}"/>
                                     </h:selectOneMenu>
-                                </p>                           
+                                </p>
+                                 <p>
+                                    <h:panelGroup rendered="#{b.edit}">
+                                        <strong>#{msg.genre}: </strong>                                    
+                                        <h:selectOneMenu  value="#{b.genre}" converter="#{genreController}">
+                                            <f:selectItems value="${genreController.selectItems}"/>
+                                        </h:selectOneMenu>
+                                    </h:panelGroup>
+                                </p>
+                                <p>
+                                    <h:panelGroup rendered="#{b.edit}">
+                                        <strong>#{msg.publisher} </strong>                                    
+                                        <h:selectOneMenu  value="#{b.publisher}" converter="#{publisherController}">
+                                            <f:selectItems value="${publisherController.selectItems}"/>
+                                        </h:selectOneMenu>
+                                    </h:panelGroup>
+                                </p>
                                 <p>
                                     <strong>#{msg.page_count}: </strong>
                                     <h:outputText value="#{b.pageCount} #{msg.pages} " rendered="#{!b.edit}"/>
                                     <h:inputText value="#{b.pageCount}" styleClass="pages_edit" rendered="#{bookListController.editModeView and b.edit}"/>                               
-                                </p>
-                                <p>
-                                    <strong>#{msg.publisher}</strong>
-                                    <h:outputText value="#{b.publisher.name}" rendered="#{!b.edit}"/>
-                                    <h:inputText value="#{b.publisher.name}" styleClass="publisher_edit" rendered="#{bookListController.editModeView and b.edit}"/>
                                 </p>
                                 <p>
                                     <strong>#{msg.publish_year}</strong>

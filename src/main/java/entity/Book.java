@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 @Entity
-@NoArgsConstructor
-@AllArgsConstructor
+//@NoArgsConstructor
+//@AllArgsConstructor
 @RequiredArgsConstructor
 public class Book implements Serializable{
     @GeneratedValue(strategy = GenerationType.IDENTITY)

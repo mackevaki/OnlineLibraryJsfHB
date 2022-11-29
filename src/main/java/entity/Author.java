@@ -4,8 +4,22 @@ import jakarta.persistence.*;
 import java.io.Serializable;
 import java.sql.Date;
 import java.util.Collection;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
+//@NoArgsConstructor
+//@AllArgsConstructor
+@RequiredArgsConstructor
+@Setter
+@Getter
+@EqualsAndHashCode(of = "id")
+@ToString(of = "fio")
 public class Author implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
@@ -19,58 +33,58 @@ public class Author implements Serializable {
     private Date birthday;
     @OneToMany(mappedBy = "author")
     private Collection<Book> books;
+//
+//    public Long getId() {
+//        return id;
+//    }
+//
+//    public void setId(Long id) {
+//        this.id = id;
+//    }
+//
+//    public String getFio() {
+//        return fio;
+//    }
+//
+//    public void setFio(String fio) {
+//        this.fio = fio;
+//    }
+//
+//    public Date getBirthday() {
+//        return birthday;
+//    }
+//
+//    public void setBirthday(Date birthday) {
+//        this.birthday = birthday;
+//    }
+//
+//    @Override
+//    public boolean equals(Object o) {
+//        if (this == o) return true;
+//        if (o == null || getClass() != o.getClass()) return false;
+//
+//        Author author = (Author) o;
+//
+//        if (id != null ? !id.equals(author.id) : author.id != null) return false;
+//        if (fio != null ? !fio.equals(author.fio) : author.fio != null) return false;
+//        if (birthday != null ? !birthday.equals(author.birthday) : author.birthday != null) return false;
+//
+//        return true;
+//    }
+//
+//    @Override
+//    public int hashCode() {
+//        int result = id != null ? id.hashCode() : 0;
+//        result = 31 * result + (fio != null ? fio.hashCode() : 0);
+//        result = 31 * result + (birthday != null ? birthday.hashCode() : 0);
+//        return result;
+//    }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getFio() {
-        return fio;
-    }
-
-    public void setFio(String fio) {
-        this.fio = fio;
-    }
-
-    public Date getBirthday() {
-        return birthday;
-    }
-
-    public void setBirthday(Date birthday) {
-        this.birthday = birthday;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Author author = (Author) o;
-
-        if (id != null ? !id.equals(author.id) : author.id != null) return false;
-        if (fio != null ? !fio.equals(author.fio) : author.fio != null) return false;
-        if (birthday != null ? !birthday.equals(author.birthday) : author.birthday != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = id != null ? id.hashCode() : 0;
-        result = 31 * result + (fio != null ? fio.hashCode() : 0);
-        result = 31 * result + (birthday != null ? birthday.hashCode() : 0);
-        return result;
-    }
-
-    public Collection<Book> getBooks() {
-        return books;
-    }
-
-    public void setBooks(Collection<Book> books) {
-        this.books = books;
-    }
+//    public Collection<Book> getBooks() {
+//        return books;
+//    }
+//
+//    public void setBooks(Collection<Book> books) {
+//        this.books = books;
+//    }
 }

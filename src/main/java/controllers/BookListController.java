@@ -118,6 +118,9 @@ public class BookListController implements Serializable {
         DataHelper.getInstance().update();
         
         cancelEdit();
+        
+        DataHelper.getInstance().refreshList();
+        
         return "books";
     }
     
@@ -150,7 +153,7 @@ public class BookListController implements Serializable {
         pager.setSelectedPageNumber(Integer.parseInt(params.get("page_number")));
 
         DataHelper.getInstance().setCurrentPager(pager);
-        DataHelper.getInstance().runCurrentCriteria();
+        DataHelper.getInstance().refreshList();
     }
     
     public void booksOnPageChanged(ValueChangeEvent e) {
@@ -160,7 +163,7 @@ public class BookListController implements Serializable {
         pager.setSelectedPageNumber(1);
 
         DataHelper.getInstance().setCurrentPager(pager);
-        DataHelper.getInstance().runCurrentCriteria();//        DataHelper.getInstance().runCurrentCriteria();
+        DataHelper.getInstance().refreshList();
     }
 //</editor-fold>
    
