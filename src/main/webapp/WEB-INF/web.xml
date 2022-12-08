@@ -68,4 +68,10 @@
             <form-error-page>/index.xhtml</form-error-page>
         </form-login-config>
     </login-config>
+    
+<!--    <error-page>
+        <exception-type>javax.faces.application.ViewExpiredException</exception-type>
+        <location>/errorpages/expired.xhtml</location>
+    </error-page>-->
+    
 </web-app>

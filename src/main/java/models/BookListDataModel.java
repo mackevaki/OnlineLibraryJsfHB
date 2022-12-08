@@ -18,7 +18,7 @@ public class BookListDataModel extends LazyDataModel<Book> {
 
     @Override
     public int count(Map<String, FilterMeta> filterBy) {
-        return 0;
+        return 0;//(int) bookList.stream().count();    
     }
 
     @Override
@@ -34,9 +34,7 @@ public class BookListDataModel extends LazyDataModel<Book> {
             }
         }
         return null;
-    }
-    
-    
+    }   
     
     @Override
     public List<Book> load(int first, int pageSize, Map<String, SortMeta> sortBy, Map<String, FilterMeta> filterBy) {
@@ -47,8 +45,8 @@ public class BookListDataModel extends LazyDataModel<Book> {
         
         this.setRowCount(pager.getTotalBooksCount());
         
-        return pager.getList();
+        bookList = pager.getList();
+        
+        return bookList;
     }
-    
-    
 }

@@ -5,28 +5,29 @@ import db.DataHelper;
 import entity.Book;
 import enums.SearchType;
 import jakarta.enterprise.context.SessionScoped;
+import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.event.ValueChangeEvent;
 import jakarta.inject.Named;
 import java.io.Serializable;
-import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.ResourceBundle;
 import models.BookListDataModel;
 import org.omnifaces.cdi.Eager;
+import org.primefaces.PrimeFaces;
 import org.primefaces.model.LazyDataModel;
 
 @Named("bookListController")
 @SessionScoped
-//@Eager
+@Eager
 public class BookListController implements Serializable {
+    private Book selectedBook;
     private Long selectedAuthorId; // текущий автор книги из списка при редактировании книги
+    
     private long selectedGenreId; // выбранный жанр
     private char selectedLetter; // выбранная буква алфавита
-    private SearchType selectedSearchType = SearchType.TITLE;// хранит выбранный тип поиска
+    private SearchType searchType = SearchType.TITLE;// хранит выбранный тип поиска
     private String searchString; // хранит поисковую строку
-//    private List<Book> currentBookList; // текущий список книг для отображения
 
     private final Pager<Book> pager = Pager.getInstance();
     private DataHelper dataHelper = DataHelper.getInstance();
@@ -34,38 +35,20 @@ public class BookListController implements Serializable {
     
     private boolean editModeView; // отображение режима редактирования
     
-//    private transient int row = -1; 
-    
-//    public int getRow() {
-//        row += 1;
-//        return row;
-//    }
-    
     public BookListController() {
-//        fillBooksAll();
         bookListModel = new BookListDataModel();                       
     }
-//    
-//    private void submitValues(Character selectedLetter, int selectedPageNumber, int selectedGenreId) {
-//        this.selectedLetter = selectedLetter;
-//        pager.setSelectedPageNumber(selectedPageNumber);
-//        this.selectedGenreId = selectedGenreId;
-//    }
+
     private void submitValues(Character selectedLetter, long selectedGenreId) {
         this.selectedLetter = selectedLetter;
         this.selectedGenreId = selectedGenreId;
     }
     
     private void fillBooksAll() {
-        //DataHelper.getInstance().getAllBooks(pager);
         dataHelper.getAllBooks();
     }
 
     public String fillBooksByGenre() {
-//        row = -1;
-        
-//        immitateLoading();
-        
         cancelEdit();
         
         Map<String, String> params = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
@@ -78,10 +61,6 @@ public class BookListController implements Serializable {
     }
     
     public String fillBooksByLetter() {
-//        row = -1;
-        
-//        immitateLoading();
-        
         cancelEdit();
         
         Map<String, String> params = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
@@ -94,11 +73,7 @@ public class BookListController implements Serializable {
         return "books";
     }
     
-    public String fillBooksBySearch() {
-//        row = -1;
-//        
-//        immitateLoading();
-        
+    public String fillBooksBySearch() {       
         cancelEdit();
                 
         submitValues(' ', -1);
@@ -108,9 +83,9 @@ public class BookListController implements Serializable {
             return "books";
         }
         
-        if (selectedSearchType == SearchType.AUTHOR) {
+        if (searchType == SearchType.AUTHOR) {
             dataHelper.getBooksByAuthor(searchString);
-        } else if (selectedSearchType == SearchType.TITLE) {
+        } else if (searchType == SearchType.TITLE) {
             dataHelper.getBooksByName(searchString);
         }
         
@@ -120,66 +95,43 @@ public class BookListController implements Serializable {
 
 //<editor-fold defaultstate="collapsed" desc="edition mode">
     
-    public String updateBooks() {
-//        immitateLoading();
-//        
-//        row = -1;
-        
-        dataHelper.update();
-        
+    public String updateBook() {  
+        dataHelper.updateBook(selectedBook);
         cancelEdit();
-        
-//        dataHelper.refreshList();
         dataHelper.populateList();
+        
+        PrimeFaces.current().executeScript("PF('dlgEditBook').hide()");
+
+        ResourceBundle bundle = ResourceBundle.getBundle("nls.messages", FacesContext.getCurrentInstance().getViewRoot().getLocale());
+        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(bundle.getString("updated")));
 
         return "books";
     }
-    
+    public void deleteBook() {
+        dataHelper.deleteBook(selectedBook);
+        dataHelper.populateList();
+
+        ResourceBundle bundle = ResourceBundle.getBundle("nls.messages", FacesContext.getCurrentInstance().getViewRoot().getLocale());
+        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(bundle.getString("deleted")));
+    }    
     public void showEdit() {
-//        row = -1;
         editModeView = true;
+        PrimeFaces.current().executeScript("PF('dlgEditBook').show()");
     }
         
     public void cancelEdit() {
-//        row = -1;   
         editModeView = false;
-        for (Book b : pager.getList()) {
-            b.setEdit(false);
-        }
+        PrimeFaces.current().executeScript("PF('dlgEditBook').hide()");
     }
 //</editor-fold>
-
 
     public Character[] getRussianLetters() {
         Character[] letters = new Character[]{'А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ё', 'Ж', 'З', 'И', 'Й', 'К', 'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У', 'Ф', 'Х', 'Ц', 'Ч', 'Ш', 'Щ', 'Ъ', 'Ы', 'Ь', 'Э', 'Ю', 'Я'};
         return letters;
     }
-//<editor-fold defaultstate="collapsed" desc="pager">
-    
-//    public void selectPage() {
-//        row = -1;
-//        cancelEdit();
-//
-//        Map<String, String> params = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
-//        pager.setSelectedPageNumber(Integer.parseInt(params.get("page_number")));
-//
-//        DataHelper.getInstance().setCurrentPager(pager);
-//        DataHelper.getInstance().refreshList();
-//    }
-//    
-//    public void booksOnPageChanged(ValueChangeEvent e) {
-//        row = -1;
-//        cancelEdit();
-//        pager.setBooksOnPage(Integer.parseInt(e.getNewValue().toString()));
-//        pager.setSelectedPageNumber(1);
-//
-//        DataHelper.getInstance().setCurrentPager(pager);
-//        DataHelper.getInstance().refreshList();
-//    }
-//</editor-fold>
    
     public void searchTypeChanged(ValueChangeEvent e) {
-        selectedSearchType = (SearchType) e.getNewValue();
+        searchType = (SearchType) e.getNewValue();
     }
     
     public void searchStringChanged(ValueChangeEvent e) {
@@ -191,7 +143,6 @@ public class BookListController implements Serializable {
         return editModeView;
     }
     
-
     public String getSearchString() {
         return searchString;
     }
@@ -200,19 +151,14 @@ public class BookListController implements Serializable {
         this.searchString = searchString;
     }
     
-    public SearchType getSelectedSearchType() {
-        return selectedSearchType;
+    public SearchType getSearchType() {
+        return searchType;
     }
     
-    public void setSelectedSearchType(SearchType selectedSearchType) {
-        this.selectedSearchType = selectedSearchType;
+    public void setSearchType(SearchType searchType) {
+        this.searchType = searchType;
     }
-    
-//    public List<Book> getCurrentBookList() {
-//        return currentBookList;
-//    }
-//   
-    
+        
     public long getSelectedGenreId() {
         return selectedGenreId;
     }
@@ -240,16 +186,14 @@ public class BookListController implements Serializable {
     public LazyDataModel<Book> getBookListModel() {
         return bookListModel;
     }
-    
-    
-    
-//</editor-fold>
-    
-    private void immitateLoading() {
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(BookListController.class.getName()).log(Level.SEVERE, null, ex);
-        }
+
+    public Book getSelectedBook() {
+        return selectedBook;
     }
+
+    public void setSelectedBook(Book selectedBook) {
+        this.selectedBook = selectedBook;
+    }
+            
+//</editor-fold>
 }

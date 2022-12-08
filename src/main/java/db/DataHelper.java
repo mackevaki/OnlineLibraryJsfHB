@@ -16,12 +16,12 @@ import java.util.List;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.query.MutationQuery;
 
 public class DataHelper {
 
     private SessionFactory sessionFactory = null;
     private static DataHelper dataHelper;
-//    private Pager currentPager;
     private Pager pager = Pager.getInstance();
 
     private SavedCriteria<Book> currentCriteria;
@@ -91,9 +91,7 @@ public class DataHelper {
         }
     }
     
-    public void getAllBooks() {
-//        currentPager = pager;
-        
+    public void getAllBooks() {       
         currentCriteria = (selectionRoot, root, query, cb) -> {return query.select(selectionRoot);};
         countCriteria = (selectionRoot, root, query, cb) -> {return query.select(cb.count(root));};
         
@@ -155,9 +153,7 @@ public class DataHelper {
         return list;
     }
 
-    public void getBooksByGenre(Long genreId) {
-//        currentPager = pager;        
-                
+    public void getBooksByGenre(Long genreId) {               
         currentCriteria = (selectionRoot, root, query, cb) -> {return query.select(selectionRoot).where(cb.equal(root.get("genre").get("id"), genreId));};
         countCriteria = (selectionRoot, root, query, cb) -> {return query.select(cb.count(root)).where(cb.equal(root.get("genre").get("id"), genreId));};
 
@@ -166,8 +162,6 @@ public class DataHelper {
     }
 
     public void getBooksByLetter(Character letter) {
-//        currentPager = pager;
-                
         currentCriteria = (selectionRoot, root, query, cb) -> {return query.select(selectionRoot).where(cb.like(cb.lower(root.get("name")), letter.toString().toLowerCase() + "%"));};
         countCriteria = (selectionRoot, root, query, cb) -> {return query.select(cb.count(root)).where(cb.like(cb.lower(root.get("name")), letter.toString().toLowerCase() + "%"));};
 
@@ -175,44 +169,45 @@ public class DataHelper {
         runCurrentCriteria();
     }
 
-    public void getBooksByAuthor(String authorName) {
-//        currentPager = pager;
-        
+    public void getBooksByAuthor(String authorName) {       
         currentCriteria = (selectionRoot, root, query, cb) -> {return query.select(selectionRoot).where(cb.like(cb.lower(root.get("author").get("fio")), "%" + authorName.toLowerCase() + "%"));};
         countCriteria = (selectionRoot, root, query, cb) -> {return query.select(cb.count(root)).where(cb.like(cb.lower(root.get("author").get("fio")), "%" + authorName.toLowerCase() + "%"));};
 
         runCountCriteria();
         runCurrentCriteria();
-
     }
 
-    public void getBooksByName(String bookName) {
-//        currentPager = pager;
-        
+    public void getBooksByName(String bookName) {        
         currentCriteria = (selectionRoot, root, query, cb) -> {return query.select(selectionRoot).where(cb.like(cb.lower(root.get("name")), "%" + bookName.toLowerCase() + "%"));};
         countCriteria = (selectionRoot, queryRoot, query, cb) -> {return query.select(cb.count(queryRoot)).where(cb.like(cb.lower(queryRoot.get("name")), "%" + bookName.toLowerCase() + "%"));};
 
         runCountCriteria();
         runCurrentCriteria();
-
     }
 
-    public void update() {
-        Session session = sessionFactory.openSession();
-        Transaction tx = session.beginTransaction();
-        
-        for(Object object : pager.getList()) {
-            Book book = (Book) object;
-            if(book.isEdit()) {
-                book.setEdit(false);
-                book.setContent(getContent(book.getId()));
-                session.merge(book);
-            }
+    public void updateBook(Book book) {
+        try (Session session = sessionFactory.openSession()) {
+            Transaction tx = session.beginTransaction();
+            
+            book.setContent(getContent(book.getId()));
+            session.merge(book);
+            
+            tx.commit();
         }
-        
-        tx.commit();
-        session.close();
     }
+    
+    public void deleteBook(Book book) {
+        try (Session session = sessionFactory.openSession()) {
+            Transaction tx = session.beginTransaction();
+            
+            session.remove(book);
+            
+            tx.commit();
+        }
+//        MutationQuery query = getSession().createMutationQuery("delete from Book where id = :id");
+//        query.setParameter("id", book.getId());
+//        int result = query.executeUpdate();
+    }    
     
     public byte[] getContent(Long id) {
         try (Session session = sessionFactory.openSession();) {
@@ -231,10 +226,6 @@ public class DataHelper {
         return (Author) getSession().get(Author.class, id);
     }
 
-//    public void setCurrentPager(Pager currentPager) {
-//        this.currentPager = currentPager;
-//    }
-//    
     public void populateList() {
         runCountCriteria();
         runCurrentCriteria();

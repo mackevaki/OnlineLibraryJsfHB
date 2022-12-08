@@ -458,3 +458,21 @@ body .ui-paginator .ui-paginator-current, body .ui-paginator .ui-paginator-rpp-o
     font-size: 14px;
     padding: 2px;
 }
+.box-sh {padding-right: 40px; overflow: hidden; }
+.box-sh h1 {float: left; color: #009999; font-size: 30px; margin-left: 39px; margin-top: 28px;}
+.box-sh a {	box-shadow: inset 0px 1px 0px 0px #f7c5c0;
+	background: linear-gradient(to bottom, #fc8d83 5%, #e4685d 100%);
+	background-color: #fc8d83;
+	border-radius: 6px;
+	border: 1px solid #d83526;
+	display: inline-block;
+	cursor: pointer;
+	color: #ffffff;
+	font-family: Verdana;
+	font-size: 14px;
+	padding: 6px 10px;
+	text-decoration: none;
+	text-shadow: 0px 1px 0px #b23e35;
+        margin: 3px;
+        float: right;
+}

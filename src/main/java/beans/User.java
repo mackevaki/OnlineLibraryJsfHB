@@ -62,6 +62,14 @@ public class User implements Serializable {
         return result;
     }
         
+    public String goHome(){
+        return "/index.xhtml?faces-redirect=true";
+    }
+    
+     public String goBooks(){
+        return "/pages/books.xhtml?faces-redirect=true";
+    }    
+    
     public String getUsername() {
         return username;
     }
