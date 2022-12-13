@@ -1,3 +1,114 @@
+.ui-datatable.books_list .ui-datatable-data tr,
+.ui-datatable.books_list .ui-datatable-data-empty tr,
+.ui-datatable.books_list .ui-datatable-data td,
+.ui-datatable.books_list .ui-datatable-data-empty td {
+    border-style: none;
+    white-space: normal;
+    padding:0;
+    background:none;
+    color: crimson;
+}
+.ui-datatable-tablewrapper {
+    overflow: auto;
+    width: 770px;
+}
+.books_list table thead tr {
+    display: none;
+}
+.ui-datatable.books_list table{
+    border: none;
+    border-collapse: inherit;
+}
+body .ui-datatable .ui-paginator {
+    background-color: antiquewhite; 
+    padding: 2px;
+    margin-top: 10px;
+}
+body .ui-button { 
+/*	box-shadow: inset 0px 1px 0px 0px #f7c5c0;
+	background: linear-gradient(to bottom, #fc8d83 5%, #e4685d 100%);
+	background-color: #fc8d83;
+	border-radius: 6px;
+	border: 1px solid #d83526;
+	display: inline-block;
+	cursor: pointer;
+	color: #ffffff;
+	font-family: Verdana;
+	font-size: 14px;
+	padding: 1px 10px;
+	text-decoration: none;
+	text-shadow: 0px 1px 0px #b23e35;
+        margin: 3px;*/
+background: #fc8d83; padding: 4px  10px; border-radius: 5px; margin-left: 6px; font-size: 14px; color: #fff; text-decoration: none; border: none;
+}
+body .ui-button.ui-state-hover {
+	background: linear-gradient(to bottom, #e4685d 5%, #fc8d83 100%);
+	background-color: #e4685d;
+        cursor: pointer;
+}
+body .ui-button.ui-state-active, body .ui-button.ui-state-down {
+	position: relative;
+	top: 1px;
+}
+body .ui-button.ui-button-text-only .ui-button-text {
+    padding: 4px 15px;
+}
+body .ui-inputfield {
+    color: #495057;
+    background: #ffffff;
+    padding: 4px 10px;
+    border: 1px solid #ced4da;
+    outline: 0 none;
+    font-size: 12px;
+    border-radius: 4px;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+    -webkit-appearance: none;
+    appearance: none;
+}
+body .ui-paginator .ui-paginator-pages .ui-paginator-page {
+    padding: 0;
+    border: 1px solid transparent;
+    text-align: center;
+    line-height: 2.286em;
+    min-width: 31.286px;
+    height: 31.286px;
+    color: #286769;
+    margin: 0 0.125em;
+    border-radius: 4px;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+    font-size: 14px;
+}
+body .ui-paginator .ui-paginator-pages .ui-paginator-page.ui-state-active {
+  background: #009999e6;
+  color: #495057;
+}
+body .ui-paginator .ui-paginator-pages .ui-paginator-page.ui-state-hover {
+  background: #00999980;
+  color: #082644;
+  border-color: transparent;
+}
+body .ui-paginator .ui-paginator-pages .ui-paginator-page.ui-state-focus {
+  outline: 0 none;
+  outline-offset: 0;
+  box-shadow: 0 0 0 0.2rem #00999969;
+}
+body .ui-paginator .ui-paginator-current, body .ui-paginator .ui-paginator-rpp-options {
+    margin: 0.5rem;
+    display: inline-block;
+    vertical-align: middle;
+    font-size: 14px;
+    padding: 2px;
+}
+.box-sh {padding-right: 40px; overflow: hidden; }
+.box-sh h1 {float: left; color: #009999; font-size: 30px; margin-left: 39px; margin-top: 28px;}
+.box-sh a {margin-top: 25px; float: right; background: #009999; padding: 10px 15px 10px 15px; border-radius: 5px; margin-left: 6px; font-size: 14px; color: #fff; text-decoration: none;}
+
+.mr { margin-top: 15px; width:105px; border-radius: 5px; background: #009999 !important; float: left; padding: 10px 17px 10px 17px; margin-left: 19px; text-decoration: none; color: #fff !important; font-size: 14px;}
+.delete-button {margin-top: 15px; margin-bottom: 0px; border-radius: 5px; background: #009999; width:105px; float: left; padding: 10px 14px 10px 14px; margin-left: 19px; text-decoration: none; color: #fff; font-size: 14px;}
+.read {margin-top:0px; margin-bottom: 0px; font-size: 13px; text-align: left; background: #009999; background:url("#{resource['images:read-bg.png']}") no-repeat 0% 40%; padding-left: 22px;}
+.delete {margin-top:0px; margin-bottom: 0px; font-size: 13px; text-align: left; background: #009999; background:url("#{resource['images:recycle.png']}") no-repeat 0% 40%; padding-left: 22px;}
+.edit {margin-top:0px; margin-bottom: 0px; font-size: 13px; text-align: left; background: #009999;background:url("#{resource['images:edit.png']}") no-repeat 0% 40%; padding-left: 22px;}
+.download {margin-top:0px; margin-bottom: 0px; font-size: 13px; text-align: left; background: #009999; background:url("#{resource['images:down-bg.png']}") no-repeat 0% 40%; padding-left: 22px;}
 .genres a, a:visited { 
     padding: 5px 5px 5px 15px;
     display: block; 
@@ -46,7 +157,7 @@ h4 {
     width: 87%;
     float: left;
     padding: 3px;
-    margin: 3px;
+    /*margin: 3px;*/
 }
 ul.nav {
     list-style: none; 
@@ -89,7 +200,7 @@ body {
 }
 .left_menu {
     float: left;
-    width: 20%;
+    width: 18%;
     padding-bottom: 10px;
     margin: 10px;
     color: crimson;
@@ -319,11 +430,11 @@ body {
 }
 .col2{
     vertical-align: top;
-    width: 240px;
+    width: 180px;
 }
 .col1{
     vertical-align: auto;
-    width: 160px;
+    width: 135px;
     margin-top: 20px;
 }
 .col2 a{
@@ -341,20 +452,16 @@ body {
 .name_edit{
     width: 150px;
 }
-
 .publisher_edit{
     width: 100%;
 }
-
 .date_edit{
     width: 100%;
 }
-
 .pages_edit{
     width: 100px;
     margin-left: 10px;
 }
-
 .descr_edit{
     width: 100%;
     height: 200px;
@@ -362,117 +469,115 @@ body {
 .ajaxLoading {
     color: #440000;
 }
-.ui-datatable.books_list .ui-datatable-data tr,
-.ui-datatable.books_list .ui-datatable-data-empty tr,
-.ui-datatable.books_list .ui-datatable-data td,
-.ui-datatable.books_list .ui-datatable-data-empty td {
-    border-style: none;
-    white-space: normal;
+#editDialog{
+    width: 800px !important;
+    height: 800px;
+}
+.pdf-link label{
+    cursor: pointer;
+    font-weight: bold;
+}
+.pdf-upload div{
+    width: 200px;
+}
+body .ui-fileupload .ui-fileupload-content { border: none !important; display: none; }
+body .ui-fileupload .ui-fileupload-buttonbar {border-bottom: none; border-left: none; border-right: none; padding: 10px 0; background: none;}
+.image-info{
+    float: left;
+    width: 50%;
+}
+.rating{
+    float:left;
+    margin-top:5px;
+}
+.image-info table{
+    margin-left: 20px;
+    margin-top:0px;
+}
+.image-info td{
     padding:0;
-    background:none;
-    color: crimson;
+    border:0;
+    vertical-align: bottom;
 }
-.books_list table thead tr {
-    display: none;
+.vote-count{
+    color:#b2b2b2;
+    margin-left: 5px;
 }
-.ui-datatable.books_list table{
+.tooltip{
+    width:500px;
+}
+.ui-widget-content.descr-text{
+    max-width:50px;
+    border:0;
+}
+.edit_book_table td, .edit_book_table tr{
+    vertical-align: top;
+    text-shadow:0;
+    border:0;
+}
+.edit_book_table .ui-panelgrid-footer td{
+    text-align: right;
+}
+.edit_book_table .ui-panelgrid-footer td button{
+    margin-left:10px;    
+}
+
+.edit_book_table tbody{
+    border:1px solid #d6d6d6;
+    padding:30px;
+}
+
+.edit_book_table img{
     border: none;
-    border-collapse: inherit;
 }
-body .ui-datatable .ui-paginator {
-    background-color: antiquewhite; 
-    padding: 2px;
-    margin-top: 10px;
+
+.edit_book_table{
+    width:100%;
 }
-body .ui-button { 
-	box-shadow: inset 0px 1px 0px 0px #f7c5c0;
-	background: linear-gradient(to bottom, #fc8d83 5%, #e4685d 100%);
-	background-color: #fc8d83;
-	border-radius: 6px;
-	border: 1px solid #d83526;
-	display: inline-block;
-	cursor: pointer;
-	color: #ffffff;
-	font-family: Verdana;
-	font-size: 14px;
-	padding: 1px 10px;
-	text-decoration: none;
-	text-shadow: 0px 1px 0px #b23e35;
-        margin: 3px;
+
+.edit_book_table .ui-widget-content{
+    border:0;
 }
-body .ui-button.ui-state-hover {
-	background: linear-gradient(to bottom, #e4685d 5%, #fc8d83 100%);
-	background-color: #e4685d;
-        cursor: pointer;
+
+.fileupload-content{
+    display: none !important;
 }
-body .ui-button.ui-state-active, body .ui-button.ui-state-down {
-	position: relative;
-	top: 1px;
+
+.ui-fileupload .start {
+    display: none !important;
 }
-body .ui-button.ui-button-text-only .ui-button-text {
-    padding: 4px 15px;
+.ui-fileupload .cancel {
+    display: none !important;
 }
-body .ui-inputfield {
-    color: #495057;
+.ui-fileupload .progress {
+    display: none !important;
+}
+body .ui-button.ui-button-text-icon-left .ui-button-text {
+     padding: 2px; 
+     padding-left: 25px;
+}
+body .ui-panel .ui-panel-content {
+    border: none;
     background: #ffffff;
-    padding: 5px 10px;
-    border: 1px solid #ced4da;
-    outline: 0 none;
-    font-size: 1rem;
-    border-radius: 4px;
-    transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
-    -webkit-appearance: none;
-    appearance: none;
+    color: #495057;
+    padding: 0rem;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    /*height: 400px;*/
 }
-body .ui-paginator .ui-paginator-pages .ui-paginator-page {
-    padding: 0;
-    border: 1px solid transparent;
-    text-align: center;
-    line-height: 2.286em;
-    min-width: 31.286px;
-    height: 31.286px;
-    color: #286769;
-    margin: 0 0.125em;
-    border-radius: 4px;
-    transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
-    font-size: 14px;
+body .ui-widget {
+    font-size: 12px;
 }
-body .ui-paginator .ui-paginator-pages .ui-paginator-page.ui-state-active {
-  background: #009999e6;
-  color: #495057;
+body .ui-panelgrid .ui-panelgrid-cell {
+    border: 1px solid #dee2e6;
+    background: #ffffff;
+    color: #495057;
+    padding: 5px;
 }
-body .ui-paginator .ui-paginator-pages .ui-paginator-page.ui-state-hover {
-  background: #00999980;
-  color: #082644;
-  border-color: transparent;
-}
-body .ui-paginator .ui-paginator-pages .ui-paginator-page.ui-state-focus {
-  outline: 0 none;
-  outline-offset: 0;
-  box-shadow: 0 0 0 0.2rem #00999969;
-}
-body .ui-paginator .ui-paginator-current, body .ui-paginator .ui-paginator-rpp-options {
-    margin: 0.5rem;
-    display: inline-block;
-    vertical-align: middle;
-    font-size: 14px;
-    padding: 2px;
-}
-.box-sh {padding-right: 40px; overflow: hidden; }
-.box-sh h1 {float: left; color: #009999; font-size: 30px; margin-left: 39px; margin-top: 28px;}
-.box-sh a {	box-shadow: inset 0px 1px 0px 0px #f7c5c0;
-	background: linear-gradient(to bottom, #fc8d83 5%, #e4685d 100%);
-	background-color: #fc8d83;
-	border-radius: 6px;
-	border: 1px solid #d83526;
-	display: inline-block;
-	cursor: pointer;
-	color: #ffffff;
-	font-family: Verdana;
-	font-size: 14px;
-	padding: 6px 10px;
-	text-decoration: none;
-	text-shadow: 0px 1px 0px #b23e35;
-        margin: 3px;
-        float: right;
+body .ui-dialog .ui-dialog-titlebar {
+    background: #ffffff;
+    color: #495057;
+    font-weight: 700;
+    border-bottom: 0 none;
+    padding: 10px;
 }

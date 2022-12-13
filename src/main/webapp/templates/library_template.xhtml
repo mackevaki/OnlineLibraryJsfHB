@@ -9,10 +9,13 @@
     <f:view locale="#{localeChanger.currentLocale}">
     <h:head>
         <title><ui:insert name="title"/></title>
-        <h:outputStylesheet library="css" name="lib_style.css" />
-        <h:outputScript library="js" name="library.js" target="head" />
+
     </h:head>
     <h:body>
+            <f:facet name="last">
+        <h:outputStylesheet library="css" name="lib_style.css" />
+        <h:outputScript library="js" name="library.js" target="head" />
+            </f:facet>        
         <p:ajaxStatus id="ajaxStatusPanel">  
                 <f:facet name="start">      
                     <div id="loading_wrapper">
