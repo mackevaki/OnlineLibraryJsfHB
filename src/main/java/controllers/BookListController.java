@@ -7,6 +7,8 @@ import enums.SearchType;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
+import jakarta.faces.event.ActionEvent;
+import jakarta.faces.event.ActionListener;
 import jakarta.faces.event.ValueChangeEvent;
 import jakarta.inject.Named;
 import java.io.Serializable;
@@ -34,7 +36,8 @@ public class BookListController implements Serializable {
     private LazyDataModel<Book> bookListModel;
     
     private boolean editModeView; // отображение режима редактирования
-    
+    private boolean addModeView;// отображение режима добавления
+
     public BookListController() {
         bookListModel = new BookListDataModel();                       
     }
@@ -95,17 +98,23 @@ public class BookListController implements Serializable {
 
 //<editor-fold defaultstate="collapsed" desc="edition mode">
     
-    public String updateBook() {  
-        dataHelper.updateBook(selectedBook);
-        cancelEdit();
-        dataHelper.populateList();
-        
-        PrimeFaces.current().executeScript("PF('dlgEditBook').hide()");
+    public ActionListener saveListener() {
+        return (ActionEvent event) -> {
+            if (editModeView) {
+                dataHelper.updateBook(selectedBook);
+            } else if(addModeView) {
+                dataHelper.addBook(selectedBook);
+            }
 
-        ResourceBundle bundle = ResourceBundle.getBundle("nls.messages", FacesContext.getCurrentInstance().getViewRoot().getLocale());
-        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(bundle.getString("updated")));
+            cancelEdit();
+            dataHelper.populateList();
 
-        return "books";
+            PrimeFaces.current().executeScript("PF('dlgEditBook').hide()");
+
+            ResourceBundle bundle = ResourceBundle.getBundle("nls.messages", FacesContext.getCurrentInstance().getViewRoot().getLocale());
+            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(bundle.getString("updated")));
+        };
+//        return "books";
     }
     public void deleteBook() {
         dataHelper.deleteBook(selectedBook);
@@ -118,7 +127,14 @@ public class BookListController implements Serializable {
         editModeView = true;
         PrimeFaces.current().executeScript("PF('dlgEditBook').show()");
     }
-        
+    
+    public void switchAddMode() {
+        addModeView = true;
+        selectedBook = new Book();
+
+        PrimeFaces.current().executeScript("PF('dlgEditBook').show()");
+    }
+     
     public void cancelEdit() {
         editModeView = false;
         PrimeFaces.current().executeScript("PF('dlgEditBook').hide()");
@@ -195,5 +211,8 @@ public class BookListController implements Serializable {
         this.selectedBook = selectedBook;
     }
             
+    public boolean isAddModeView() {
+        return addModeView;
+    }
 //</editor-fold>
 }

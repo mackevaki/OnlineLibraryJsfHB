@@ -31,18 +31,17 @@ public class ContentController implements Serializable {
         if (uploadedContent != null && uploadedContent.length > 0){
             showContent = true;
         }
-        bookListController.getSelectedBook().setContent(uploadedContent);
+//        bookListController.getSelectedBook().setContent(uploadedContent);
     }
 
-//    public ActionListener saveListener() {
-//        return (ActionEvent event) -> {
-//            if (uploadedContent != null) {
-//                bookListController.getSelectedBook().setContent(uploadedContent);
-//                bookListController.getSelectedBook().setContentEdited(true);
-//            }
-//            clear();
-//        };
-//    }
+    public ActionListener saveListener() {
+        return (ActionEvent event) -> {
+            if (uploadedContent != null) {
+                bookListController.getSelectedBook().setContent(uploadedContent);
+            }
+            clear();
+        };
+    }
 
     public ActionListener clearListener() {
         return (ActionEvent event) -> {

@@ -26,20 +26,28 @@
                 </h:form>
             </div>
             
-            <div class="search_div">
-                <h:form styleClass="search_form">
-                    <p:inputText id="search_string" styleClass="search_string" value="#{bookListController.searchString}" valueChangeListener="#{bookListController.searchStringChanged}">
-                        <p:ajax event="change" global="false"/>
-                    </p:inputText>
-                    <p:commandButton value="#{msg.search}" styleClass="search_button" actionListener="#{bookListController.fillBooksBySearch}" update=":booksForm:booksList @form :lettersForm :genresForm :booksCount"/>
-                </h:form>   
-                
-                <h:form styleClass="search_type">
-                    <h:selectOneMenu  styleClass="search_type_dropdown" value="#{bookListController.searchType}" valueChangeListener="#{bookListController.searchTypeChanged}">
-                        <f:selectItems value="${searchTypeController.searchList}" />
-                        <p:ajax event="change" global="false"/>
-                    </h:selectOneMenu>
+            <div class="search">
+                <h:form styleClass="search_form" id="search_form">
+
+                    <input type="submit" class="button-text"></input>
+
+                    <h:inputText  id="search_string" styleClass="search-text" value="#{bookListController.searchString}"/>
+
+                    <p:commandButton id="btnSearch" value="#{msg.search}" styleClass="button" actionListener="#{bookListController.fillBooksBySearch}" update=":booksForm:booksList @form :lettersForm :genresForm :booksCount"/>
+
+                    <div class="dropdown">
+                        <h:selectOneMenu id="search_select" styleClass="select_search" value="#{bookListController.searchType}">
+                            <f:selectItems value="${searchTypeController.searchList}" />
+                        </h:selectOneMenu>
+                    </div>
+
+                    <script language="javascript">
+                          document.getElementById("search_form:search_string").setAttribute("placeholder","#{msg.search_book}");
+                    </script>
+
+                    <p:defaultCommand target="btnSearch" />
                 </h:form>
+                <div class="clear"></div>
             </div>
             
             <div class="letters">

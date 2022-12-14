@@ -14,7 +14,11 @@
                 <div class="box-sh">
                     <h1><p:outputLabel id="booksCount" value="#{msg.book_count}  #{bookListController.pager.totalBooksCount}" /></h1>
 
-                    <h:outputLink rendered="#{request.isUserInRole('ADMIN')}" value="#"><h:outputText value="#{msg.add_book}"/></h:outputLink>
+                    <h:form id="add-action" rendered="#{request.isUserInRole('ADMIN')}">
+                        <p:commandLink  actionListener="#{bookListController.switchAddMode}" update=":imagePanel :formEditBook :formUploadImage :formUploadPdf">
+                            <h:outputText value="#{msg.add_book}" title="#{msg.add_book}"/>
+                        </p:commandLink>
+                    </h:form>                
                 </div>            
             </ui:define>
             
@@ -27,25 +31,24 @@
                 <p:dialog styleClass="editDialog" modal="true" widgetVar="dlgEditBook" dynamic="true" resizable="false" header="#{msg.edit_book}" closable="false" >
                     <p:panelGrid columns="2" columnClasses="col1, col2" styleClass="edit_book_table" >
                         <p:panel id="imagePanel">
-                            <p:graphicImage  value="#{imageController.defaultImage}" width="110" height="150" id="bookImage"/>
+                            <p:graphicImage  value="#{imageController.defaultImage}" width="110" height="150" id="bookImage"  rendered="#{bookListController.editModeView}"/>
                             <h:form enctype="multipart/form-data" id="formUploadImage" >
                                 <p:fileUpload id="imageUpload" label="#{msg.load}" listener="#{imageController.handleFileUpload}" update="bookNewImage" sizeLimit="#{imageController.imageMaxSize}" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" multiple="false" auto="true"/>  
-                                <p:graphicImage value="#{imageController.uploadedImage}" library="images" width="110" height="150" id="bookNewImage"/>
+                                <p:graphicImage cache="false" value="#{imageController.uploadedImage}" library="images" width="110" height="150" id="bookNewImage"/>
                                 <p:autoUpdate id="messagesImage"/>
                             </h:form>
 
                             <h:form enctype="multipart/form-data" id="formUploadPdf">
-
-                              <p:fileUpload  id="pdfUpload" label="#{msg.load_pdf}" listener="#{contentController.handleFileUpload}" update="@form" allowTypes="/(\.|\/)(pdf)$/" multiple="false" auto="true" styleClass="pdf-upload"/>  
-                              <h:outputLink id="uploadedPdfLink" value="#{request.contextPath}/UploadedPdf"  target="_blank" styleClass="pdf-link" rendered="#{contentController.showContent}">                                                             
-                                  <p:outputLabel value="#{msg.show_uploaded_pdf}"/>
-                              </h:outputLink> 
-                              <p:autoUpdate id="messages-pdf"/>
+                                <p:fileUpload  id="pdfUpload" label="#{msg.load_pdf}" listener="#{contentController.handleFileUpload}" update="@form" allowTypes="/(\.|\/)(pdf)$/" multiple="false" auto="true" styleClass="pdf-upload"/>  
+                                <h:outputLink id="uploadedPdfLink" value="#{request.contextPath}/UploadedPdf"  target="_blank" styleClass="pdf-link" rendered="#{contentController.showContent}">                                                             
+                                    <p:outputLabel value="#{msg.show_uploaded_pdf}"/>
+                                </h:outputLink> 
+                                <p:autoUpdate id="messages-pdf"/>
                           </h:form>
                         </p:panel>   
                         
                         <p:panel>
-                            <h:form id="formEditBook"  rendered="#{bookListController.editModeView}">
+                            <h:form id="formEditBook"  rendered="#{bookListController.editModeView or bookListController.addModeView}">
 
                                 <p:panelGrid id="bookDetails" columns="2" columnClasses="col1, col2" styleClass="edit_book_table">                   
                                     <strong>#{msg.book_name}: </strong>
@@ -75,21 +78,28 @@
                                     <strong>#{msg.page_count} </strong>
                                     <p:inputText id="inputPageCount" value="#{bookListController.selectedBook.pageCount}" required="true" />  
                                     
-                                    <p:outputLabel value="#{msg.text}:" styleClass="edit-title"/>
+                                    <p:outputLabel rendered="#{bookListController.editModeView}" value="#{msg.text}:" styleClass="edit-title"/>
                                     
-                                    <h:outputLink value="#{request.contextPath}/PdfContent"  target="_blank" styleClass="pdf-link">                                                             
+                                    <h:outputLink value="#{request.contextPath}/PdfContent"  target="_blank" styleClass="pdf-link"  rendered="#{bookListController.editModeView}">                                                             
                                         <p:outputLabel value="#{msg.show_pdf}"/>
                                         <f:param name="id" value="#{bookListController.selectedBook.id}"/>
                                     </h:outputLink> 
                             
                                     <strong>#{msg.descr} </strong>
                                     <p:panel style="height: 200px;">
-                                        <p:inputTextarea id="inputDescr" value="#{bookListController.selectedBook.descr}" cols="60" rows="10" maxlength="1500" counter="counter" counterTemplate="#{msg.letters_left} {0}"/>
+                                        <p:inputTextarea id="inputDescr" value="#{bookListController.selectedBook.descr}" cols="60" rows="10" maxlength="1500" counter="counter" counterTemplate="#{msg.letters_left} {0}" autoResize="false"/>
                                         <h:outputText id="counter" />  
                                     </p:panel>
 
-                                    <p:commandButton styleClass="button-update" value="#{msg.save}"  onclick="this.disabled=true;" update="booksForm:booksList :growlMessage" action="#{bookListController.updateBook}"/>
-                                    <p:commandButton action="#{bookListController.cancelEdit()}" value="#{msg.cancel}" immediate="true" global="false"/>    
+                                    <p:commandButton styleClass="button-update" value="#{msg.save}"  onclick="this.disabled=true;" update=":imagePanel :formUploadImage :formUploadPdf :formEditBook :booksForm:booksList :booksCount :growlMessage">
+                                        <f:actionListener binding="#{imageController.saveListener()}"/>     
+                                        <f:actionListener binding="#{contentController.saveListener()}"/>
+                                        <f:actionListener binding="#{bookListController.saveListener()}"/>     
+                                    </p:commandButton>
+                                    <p:commandButton action="#{bookListController.cancelEdit()}" value="#{msg.cancel}" immediate="true" global="false">    
+                                        <f:actionListener binding="#{imageController.clearListener()}"/>     
+                                        <f:actionListener binding="#{contentController.clearListener()}"/>
+                                    </p:commandButton>
                                 </p:panelGrid>
                             </h:form>
                         </p:panel>
@@ -160,7 +170,7 @@
                                 <f:param name="save" value="true"/>
                             </h:outputLink>  
                             
-                            <p:commandLink styleClass="mr" actionListener="#{bookListController.showEdit}" title="#{msg.edit_book}" update=":formEditBook:bookDetails" rendered="#{request.isUserInRole('ADMIN')}">  
+                            <p:commandLink styleClass="mr" actionListener="#{bookListController.showEdit}" title="#{msg.edit_book}" update=":imagePanel :formEditBook :formUploadImage :formUploadPdf" rendered="#{request.isUserInRole('ADMIN')}">  
                                 <p class="edit">#{msg.edit}</p>
                                 <f:setPropertyActionListener value="#{b}" target="#{bookListController.selectedBook}" />  
                             </p:commandLink> 

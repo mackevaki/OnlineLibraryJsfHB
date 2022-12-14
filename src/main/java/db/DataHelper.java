@@ -12,6 +12,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Selection;
+import java.io.Serializable;
 import java.util.List;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -189,12 +190,25 @@ public class DataHelper {
         try (Session session = sessionFactory.openSession()) {
             Transaction tx = session.beginTransaction();
             
-            book.setContent(getContent(book.getId()));
+            if (book.getContent() == null) {
+                book.setContent(getContent(book.getId()));
+            } 
+            
             session.merge(book);
             
             tx.commit();
         }
     }
+    
+    public void addBook(Book book) {
+        try (Session session = sessionFactory.openSession()) {
+            Transaction tx = session.beginTransaction();
+            
+            session.persist(book);
+            
+            tx.commit();
+        }
+    }    
     
     public void deleteBook(Book book) {
         try (Session session = sessionFactory.openSession()) {
