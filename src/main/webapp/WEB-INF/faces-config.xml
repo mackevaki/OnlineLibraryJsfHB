@@ -29,6 +29,9 @@
             <base-name>nls.messages</base-name>
             <var>msg</var>
         </resource-bundle>
+        <message-bundle>
+            nls.messages
+        </message-bundle>
     </application>
     <navigation-rule>
         <from-view-id>/index.xhtml</from-view-id>

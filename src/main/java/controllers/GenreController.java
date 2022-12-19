@@ -30,6 +30,8 @@ public class GenreController implements Serializable, Converter {
         genreList = DataHelper.getInstance().getAllGenres();
         
         Collections.sort(genreList, Comparator.comparing(Genre::toString));
+        
+//        genreList.add(0, createEmptyGenre());
 
         for (Genre genre : genreList) {
             genreMap.put(genre.getId(), genre);
@@ -54,4 +56,11 @@ public class GenreController implements Serializable, Converter {
     public String getAsString(FacesContext context, UIComponent component, Object value) {
         return ((Genre) value).getId().toString();
     }
+    
+//    private Genre createEmptyGenre() {
+//        Genre genre = new Genre();
+//        genre.setId(-1L);
+//        genre.setName("");
+//        return genre;
+//    }
 }

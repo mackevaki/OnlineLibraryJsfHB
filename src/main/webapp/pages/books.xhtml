@@ -52,7 +52,7 @@
 
                                 <p:panelGrid id="bookDetails" columns="2" columnClasses="col1, col2" styleClass="edit_book_table">                   
                                     <strong>#{msg.book_name}: </strong>
-                                    <p:inputText id="inputBookName" value="#{bookListController.selectedBook.name}"  required="true" requiredMessage="#{msg.required_field}" size="60"/>
+                                    <p:inputText id="inputBookName" value="#{bookListController.selectedBook.name}" size="60"/>
 
                                     <strong>#{msg.author_name}: </strong>
                                     <h:selectOneMenu style="font-size: 12px;" value="#{bookListController.selectedBook.author}" converter="#{authorController}">
@@ -70,13 +70,13 @@
                                     </h:selectOneMenu>
 
                                     <strong>#{msg.publish_year} </strong>
-                                    <p:inputText id="inputPublishYear" value="#{bookListController.selectedBook.publishDate}" required="true"/>
+                                    <p:inputText id="inputPublishYear" value="#{bookListController.selectedBook.publishDate}"/>
 
                                     <strong>#{msg.isbn} </strong>
-                                    <p:inputText id="inputIsbn" value="#{bookListController.selectedBook.isbn}" required="true"/>
+                                    <p:inputText id="inputIsbn" value="#{bookListController.selectedBook.isbn}" />
 
                                     <strong>#{msg.page_count} </strong>
-                                    <p:inputText id="inputPageCount" value="#{bookListController.selectedBook.pageCount}" required="true" />  
+                                    <p:inputText id="inputPageCount" value="#{bookListController.selectedBook.pageCount}"  />  
                                     
                                     <p:outputLabel rendered="#{bookListController.editModeView}" value="#{msg.text}:" styleClass="edit-title"/>
                                     
@@ -90,8 +90,11 @@
                                         <p:inputTextarea id="inputDescr" value="#{bookListController.selectedBook.descr}" cols="60" rows="10" maxlength="1500" counter="counter" counterTemplate="#{msg.letters_left} {0}" autoResize="false"/>
                                         <h:outputText id="counter" />  
                                     </p:panel>
-
-                                    <p:commandButton styleClass="button-update" value="#{msg.save}"  onclick="this.disabled=true;" update=":imagePanel :formUploadImage :formUploadPdf :formEditBook :booksForm:booksList :booksCount :growlMessage">
+                                    
+                                <f:facet name="footer">
+                                    <h:messages styleClass="error"/>    
+                                    
+                                    <p:commandButton styleClass="button-update" value="#{msg.save}"  onclick="this.disabled=true;" update=":imagePanel :formEditBook :booksForm:booksList :booksCount :growlMessage">
                                         <f:actionListener binding="#{imageController.saveListener()}"/>     
                                         <f:actionListener binding="#{contentController.saveListener()}"/>
                                         <f:actionListener binding="#{bookListController.saveListener()}"/>     
@@ -100,6 +103,7 @@
                                         <f:actionListener binding="#{imageController.clearListener()}"/>     
                                         <f:actionListener binding="#{contentController.clearListener()}"/>
                                     </p:commandButton>
+                                </f:facet>
                                 </p:panelGrid>
                             </h:form>
                         </p:panel>

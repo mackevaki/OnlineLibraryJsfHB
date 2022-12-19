@@ -2,8 +2,12 @@ package controllers;
 
 import beans.Pager;
 import db.DataHelper;
+import entity.Author;
 import entity.Book;
+import entity.Genre;
+import entity.Publisher;
 import enums.SearchType;
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
@@ -23,6 +27,8 @@ import org.primefaces.model.LazyDataModel;
 @SessionScoped
 @Eager
 public class BookListController implements Serializable {
+    private ResourceBundle bundle; 
+    
     private Book selectedBook;
     private Long selectedAuthorId; // текущий автор книги из списка при редактировании книги
     
@@ -39,9 +45,14 @@ public class BookListController implements Serializable {
     private boolean addModeView;// отображение режима добавления
 
     public BookListController() {
-        bookListModel = new BookListDataModel();                       
+        bookListModel = new BookListDataModel();  
     }
 
+    @PostConstruct
+    public void init() {
+        bundle = ResourceBundle.getBundle("nls.messages", FacesContext.getCurrentInstance().getViewRoot().getLocale());       
+    }
+    
     private void submitValues(Character selectedLetter, long selectedGenreId) {
         this.selectedLetter = selectedLetter;
         this.selectedGenreId = selectedGenreId;
@@ -100,6 +111,10 @@ public class BookListController implements Serializable {
     
     public ActionListener saveListener() {
         return (ActionEvent event) -> {
+            if (!validateFields()) {
+                return;
+            }           
+            
             if (editModeView) {
                 dataHelper.updateBook(selectedBook);
             } else if(addModeView) {
@@ -111,7 +126,7 @@ public class BookListController implements Serializable {
 
             PrimeFaces.current().executeScript("PF('dlgEditBook').hide()");
 
-            ResourceBundle bundle = ResourceBundle.getBundle("nls.messages", FacesContext.getCurrentInstance().getViewRoot().getLocale());
+//            ResourceBundle bundle = ResourceBundle.getBundle("nls.messages", FacesContext.getCurrentInstance().getViewRoot().getLocale());
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(bundle.getString("updated")));
         };
 //        return "books";
@@ -120,7 +135,7 @@ public class BookListController implements Serializable {
         dataHelper.deleteBook(selectedBook);
         dataHelper.populateList();
 
-        ResourceBundle bundle = ResourceBundle.getBundle("nls.messages", FacesContext.getCurrentInstance().getViewRoot().getLocale());
+//        ResourceBundle bundle = ResourceBundle.getBundle("nls.messages", FacesContext.getCurrentInstance().getViewRoot().getLocale());
         FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(bundle.getString("deleted")));
     }    
     public void showEdit() {
@@ -215,4 +230,63 @@ public class BookListController implements Serializable {
         return addModeView;
     }
 //</editor-fold>
+    
+    private boolean validateFields() {
+        if (isNullOrEmpty(selectedBook.getAuthor())
+                || isNullOrEmpty(selectedBook.getDescr())
+                || isNullOrEmpty(selectedBook.getGenre())
+                || isNullOrEmpty(selectedBook.getIsbn())
+                || isNullOrEmpty(selectedBook.getName())
+                || isNullOrEmpty(selectedBook.getPageCount())
+                || isNullOrEmpty(selectedBook.getPublishDate())
+                || isNullOrEmpty(selectedBook.getPublisher())) {
+//            ResourceBundle bundle = ResourceBundle.getBundle("nls.messages", FacesContext.getCurrentInstance().getViewRoot().getLocale());
+            failValidation(bundle.getString("error_fill_all_fields"));
+            return false;
+        }
+                
+        if (dataHelper.isIsbnExists(selectedBook.getIsbn(), selectedBook.getId())){
+//            ResourceBundle bundle = ResourceBundle.getBundle("nls.messages", FacesContext.getCurrentInstance().getViewRoot().getLocale());
+            failValidation(bundle.getString("error_isbn_exist"));
+            return false;            
+        }
+
+        if (addModeView) {
+            if (selectedBook.getContent() == null) {
+//                ResourceBundle bundle = ResourceBundle.getBundle("nls.messages", FacesContext.getCurrentInstance().getViewRoot().getLocale());
+
+                failValidation(bundle.getString("error_load_pdf"));
+                return false;
+            }
+
+            if (selectedBook.getImage() == null) {
+//                ResourceBundle bundle = ResourceBundle.getBundle("nls.messages", FacesContext.getCurrentInstance().getViewRoot().getLocale());
+
+                failValidation(bundle.getString("error_load_image"));
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private boolean isNullOrEmpty(Object obj) {
+//        if (obj instanceof Genre) {
+//            return ((Genre) obj).getName().trim().equals("");
+//        }
+//        if (obj instanceof Publisher) {
+//            return ((Publisher) obj).getName().trim().equals("");
+//        }
+//        if (obj instanceof Author) {
+//            return ((Author) obj).getFio().trim().equals("");
+//        }        
+        return obj == null || obj.toString().trim().equals("");
+    }
+
+    private void failValidation(String message) {
+//            ResourceBundle bundle = ResourceBundle.getBundle("nls.messages", FacesContext.getCurrentInstance().getViewRoot().getLocale());
+
+        FacesContext.getCurrentInstance().validationFailed();
+        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, message, bundle.getString("error")));
+    }
 }

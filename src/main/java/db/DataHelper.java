@@ -186,6 +186,28 @@ public class DataHelper {
         runCurrentCriteria();
     }
 
+    public boolean isIsbnExists(String isbn, Long id) {
+        try (Session session = sessionFactory.openSession()) {
+            Transaction tx = session.beginTransaction();
+
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+            Root<Book> root = cq.from(Book.class);
+
+            if (id == null || id == 0) {
+                cq.select(cb.count(root)).where(cb.equal(root.get("isbn"), isbn));
+            } else {
+                cq.select(cb.count(root)).where(cb.and(cb.equal(root.get("isbn"), isbn), cb.not(cb.equal(root.get("id"), id))));
+            }
+
+            Long result = session.createQuery(cq).getSingleResult();
+            
+            tx.commit();
+
+            return result >= 1;
+        }
+    }
+    
     public void updateBook(Book book) {
         try (Session session = sessionFactory.openSession()) {
             Transaction tx = session.beginTransaction();
