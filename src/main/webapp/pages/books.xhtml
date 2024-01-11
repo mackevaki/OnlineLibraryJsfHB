@@ -6,15 +6,15 @@
       xmlns:f="http://xmlns.jcp.org/jsf/core"
       xmlns:p="http://primefaces.org/ui">
     <head>
-        <title>Онлайн библиотека</title>
+        <title>#{msg.index_title}</title>
     </head>
     <h:body>
         <ui:composition template="/templates/library_template.xhtml">
             <ui:define name="books_count">
                 <div class="box-sh">
-                    <h1><p:outputLabel id="booksCount" value="#{msg.book_count}  #{bookListController.pager.totalBooksCount}" /></h1>
+                    <h1><p:outputLabel id="booksCount" value="#{msg.book_count}  #{bookListController.pager.totalBooksCount}" ></p:outputLabel></h1>
 
-                    <h:form id="add-action" rendered="#{request.isUserInRole('ADMIN')}">
+                    <h:form id="add-action" rendered="#{request.isUserInRole('admin')}">
                         <p:commandLink  actionListener="#{bookListController.switchAddMode}" update=":imagePanel :formEditBook :formUploadImage :formUploadPdf">
                             <h:outputText value="#{msg.add_book}" title="#{msg.add_book}"/>
                         </p:commandLink>
@@ -27,88 +27,8 @@
             </ui:define>
             
             <ui:define name="content">
-                <p:growl life="3000" id="growlMessage" globalOnly="true"/> 
-                <p:dialog styleClass="editDialog" modal="true" widgetVar="dlgEditBook" dynamic="true" resizable="false" header="#{msg.edit_book}" closable="false" >
-                    <p:panelGrid columns="2" columnClasses="col1, col2" styleClass="edit_book_table" >
-                        <p:panel id="imagePanel">
-                            <p:graphicImage  value="#{imageController.defaultImage}" width="110" height="150" id="bookImage"  rendered="#{bookListController.editModeView}"/>
-                            <h:form enctype="multipart/form-data" id="formUploadImage" >
-                                <p:fileUpload id="imageUpload" label="#{msg.load}" listener="#{imageController.handleFileUpload}" update="bookNewImage" sizeLimit="#{imageController.imageMaxSize}" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" multiple="false" auto="true"/>  
-                                <p:graphicImage cache="false" value="#{imageController.uploadedImage}" library="images" width="110" height="150" id="bookNewImage"/>
-                                <p:autoUpdate id="messagesImage"/>
-                            </h:form>
 
-                            <h:form enctype="multipart/form-data" id="formUploadPdf">
-                                <p:fileUpload  id="pdfUpload" label="#{msg.load_pdf}" listener="#{contentController.handleFileUpload}" update="@form" allowTypes="/(\.|\/)(pdf)$/" multiple="false" auto="true" styleClass="pdf-upload"/>  
-                                <h:outputLink id="uploadedPdfLink" value="#{request.contextPath}/UploadedPdf"  target="_blank" styleClass="pdf-link" rendered="#{contentController.showContent}">                                                             
-                                    <p:outputLabel value="#{msg.show_uploaded_pdf}"/>
-                                </h:outputLink> 
-                                <p:autoUpdate id="messages-pdf"/>
-                          </h:form>
-                        </p:panel>   
-                        
-                        <p:panel>
-                            <h:form id="formEditBook"  rendered="#{bookListController.editModeView or bookListController.addModeView}">
-
-                                <p:panelGrid id="bookDetails" columns="2" columnClasses="col1, col2" styleClass="edit_book_table">                   
-                                    <strong>#{msg.book_name}: </strong>
-                                    <p:inputText id="inputBookName" value="#{bookListController.selectedBook.name}" size="60"/>
-
-                                    <strong>#{msg.author_name}: </strong>
-                                    <h:selectOneMenu style="font-size: 12px;" value="#{bookListController.selectedBook.author}" converter="#{authorController}">
-                                        <f:selectItems value="${authorController.selectItems}"/>
-                                    </h:selectOneMenu>
-
-                                    <strong>#{msg.genre}: </strong>
-                                    <h:selectOneMenu style="font-size: 12px;"   value="#{bookListController.selectedBook.genre}" converter="#{genreController}">
-                                        <f:selectItems value="${genreController.selectItems}"/>
-                                    </h:selectOneMenu>
-
-                                    <strong>#{msg.publisher} </strong>
-                                    <h:selectOneMenu style="font-size: 12px;" value="#{bookListController.selectedBook.publisher}" converter="#{publisherController}">
-                                        <f:selectItems value="${publisherController.selectItems}"/>
-                                    </h:selectOneMenu>
-
-                                    <strong>#{msg.publish_year} </strong>
-                                    <p:inputText id="inputPublishYear" value="#{bookListController.selectedBook.publishDate}"/>
-
-                                    <strong>#{msg.isbn} </strong>
-                                    <p:inputText id="inputIsbn" value="#{bookListController.selectedBook.isbn}" />
-
-                                    <strong>#{msg.page_count} </strong>
-                                    <p:inputText id="inputPageCount" value="#{bookListController.selectedBook.pageCount}"  />  
-                                    
-                                    <p:outputLabel rendered="#{bookListController.editModeView}" value="#{msg.text}:" styleClass="edit-title"/>
-                                    
-                                    <h:outputLink value="#{request.contextPath}/PdfContent"  target="_blank" styleClass="pdf-link"  rendered="#{bookListController.editModeView}">                                                             
-                                        <p:outputLabel value="#{msg.show_pdf}"/>
-                                        <f:param name="id" value="#{bookListController.selectedBook.id}"/>
-                                    </h:outputLink> 
-                            
-                                    <strong>#{msg.descr} </strong>
-                                    <p:panel style="height: 200px;">
-                                        <p:inputTextarea id="inputDescr" value="#{bookListController.selectedBook.descr}" cols="60" rows="10" maxlength="1500" counter="counter" counterTemplate="#{msg.letters_left} {0}" autoResize="false"/>
-                                        <h:outputText id="counter" />  
-                                    </p:panel>
-                                    
-                                <f:facet name="footer">
-                                    <h:messages styleClass="error"/>    
-                                    
-                                    <p:commandButton styleClass="button-update" value="#{msg.save}"  onclick="this.disabled=true;" update=":imagePanel :formEditBook :booksForm:booksList :booksCount :growlMessage">
-                                        <f:actionListener binding="#{imageController.saveListener()}"/>     
-                                        <f:actionListener binding="#{contentController.saveListener()}"/>
-                                        <f:actionListener binding="#{bookListController.saveListener()}"/>     
-                                    </p:commandButton>
-                                    <p:commandButton action="#{bookListController.cancelEdit()}" value="#{msg.cancel}" immediate="true" global="false">    
-                                        <f:actionListener binding="#{imageController.clearListener()}"/>     
-                                        <f:actionListener binding="#{contentController.clearListener()}"/>
-                                    </p:commandButton>
-                                </f:facet>
-                                </p:panelGrid>
-                            </h:form>
-                        </p:panel>
-                    </p:panelGrid>
-                </p:dialog>
+                <ui:include src="editBook.xhtml"/>
                 
                 <h:form id="booksForm">
                    
@@ -116,11 +36,25 @@
                                  rowsPerPageTemplate="5,10,15" paginatorTemplate="{RowsPerPageDropdown} {PageLinks}"  paginatorAlwaysVisible="false" emptyMessage="" > 
                         <p:column styleClass="col1">
                             <h:outputLink value="#{request.contextPath}/PdfContent?id=#{b.id}" target="_blank">
-                                <p:graphicImage value="/ShowImage?index=#{bookListController.pager.rowIndex}" cache="false" width="120" height="160" />
+                                <p:graphicImage value="/ShowImage?index=#{requestController.incrementBookIndex}" cache="false" width="120" height="160" />
                                 <f:param name="id" value="#{b.id}"/>
                             </h:outputLink>
+
+                            <p:panelGrid id="ratingPanel" columns="1">
+
+                                <p:rating id="rating" value="#{b.avgRating}" styleClass="rating" cancel="false" stars="5">
+                                    <p:ajax event="rate" listener="#{bookListController.rate}"
+                                            onsuccess="alert('#{msg.thanks_rating}')"  />
+                                    <f:param name="bookId" value="#{b.id}"/>
+                                </p:rating>
+
+                                <p:outputLabel id="voteCount" value="#{msg.vote_count}: #{b.totalVoteCount}" styleClass="vote-count"/>
+                            </p:panelGrid>
                         </p:column>
-                        
+
+                        <p:remoteCommand name="rate" actionListener="#{bookListController.rate}" global="false"
+                                         oncomplete="alert('#{msg.thanks_rating}')"/>
+
                         <p:column styleClass="col2">
                             <div class="book_info">
                                 <p> 
@@ -174,12 +108,12 @@
                                 <f:param name="save" value="true"/>
                             </h:outputLink>  
                             
-                            <p:commandLink styleClass="mr" actionListener="#{bookListController.showEdit}" title="#{msg.edit_book}" update=":imagePanel :formEditBook :formUploadImage :formUploadPdf" rendered="#{request.isUserInRole('ADMIN')}">  
+                            <p:commandLink styleClass="mr" actionListener="#{bookListController.showEdit}" title="#{msg.edit_book}" update=":imagePanel :formEditBook :formUploadImage :formUploadPdf" rendered="#{request.isUserInRole('admin')}">
                                 <p class="edit">#{msg.edit}</p>
                                 <f:setPropertyActionListener value="#{b}" target="#{bookListController.selectedBook}" />  
                             </p:commandLink> 
 
-                            <p:commandLink styleClass="delete-button" title="#{msg.delete_book}" type="button" onclick="PF('dlgDeleteBook').show()" rendered="#{request.isUserInRole('ADMIN')}" >  
+                            <p:commandLink styleClass="delete-button" title="#{msg.delete_book}" type="button" onclick="PF('dlgDeleteBook').show()" rendered="#{request.isUserInRole('admin')}" >
                                 <p class="delete">#{msg.delete}</p>
                                 <f:setPropertyActionListener value="#{b}" target="#{bookListController.selectedBook}" /> 
                             </p:commandLink> 
@@ -194,8 +128,8 @@
                                     <f:actionListener binding="#{contentController.clearListener()}"/>     
                             </p:commandButton>
                         </h:panelGrid>
-                    </p:confirmDialog>                      
-                </h:form>    
+                    </p:confirmDialog>
+                </h:form>
             </ui:define>
 
         </ui:composition>

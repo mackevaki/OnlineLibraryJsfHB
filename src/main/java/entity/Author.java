@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-@Entity
+@Entity(name = "author")
 //@NoArgsConstructor
 //@AllArgsConstructor
 @RequiredArgsConstructor

@@ -1,23 +1,20 @@
 package db;
 
 import beans.Pager;
-import entity.Author;
-import entity.Book;
-import entity.Genre;
-import entity.HibernateUtil;
-import entity.Publisher;
+import entity.*;
 import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Selection;
-import java.io.Serializable;
+
 import java.util.List;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.hibernate.query.MutationQuery;
+import org.hibernate.query.NativeQuery;
+import org.primefaces.PrimeFaces;
 
 public class DataHelper {
 
@@ -55,7 +52,20 @@ public class DataHelper {
         Root<Book> from = criteriaQuery.from(Book.class);
         CriteriaQuery<Book> select;
                 
-        Selection[] selection = {from.get("id").alias("id"), from.get("name").alias("name"), from.get("image").alias("image"), from.get("genre").alias("genre"), from.get("pageCount").alias("pageCount"), from.get("isbn").alias("isbn"), from.get("publisher").alias("publisher"), from.get("author").alias("author"), from.get("publishDate").alias("publishDate"), from.get("descr").alias("descr")};
+        Selection[] selection = {from.get("id").alias("id"),
+                from.get("name").alias("name"),
+                from.get("image").alias("image"),
+                from.get("genre").alias("genre"),
+                from.get("pageCount").alias("pageCount"),
+                from.get("isbn").alias("isbn"),
+                from.get("publisher").alias("publisher"),
+                from.get("author").alias("author"),
+                from.get("publishDate").alias("publishDate"),
+                from.get("descr").alias("descr"),
+                from.get("avgRating").alias("avgRating"),
+                from.get("totalVoteCount").alias("totalVoteCount"),
+                from.get("totalRating").alias("totalRating")
+        };
         
         select = currentCriteria.getCriteriaQuery(criteriaBuilder.construct(Book.class, selection), from, criteriaQuery, criteriaBuilder).orderBy(criteriaBuilder.asc(from.get("name")));
         
@@ -265,5 +275,51 @@ public class DataHelper {
     public void populateList() {
         runCountCriteria();
         runCurrentCriteria();
+    }
+
+    public void rateBook(Book book, Vote vote) {
+        try (Session session = sessionFactory.openSession()) {
+            Transaction tx = session.beginTransaction();
+
+            session.persist(vote);
+            session.merge(book);
+            tx.commit();
+        }
+
+       // updateBookRate(book);
+    }
+
+    private void updateBookRate(Book book) {
+        // обновляем таблицу book согласно новым данным рейтинга
+        NativeQuery<Book> query = getSession().createNativeQuery("update Book b set b.total_vote_count=:totalVoteCount, b.total_rating=:totalRating, b.avg_rating=:avgRating where b.id =:id", Book.class);
+
+        query.setParameter("id", book.getId());
+        query.setParameter("totalVoteCount", book.getTotalVoteCount());
+        query.setParameter("totalRating", book.getTotalRating());
+        query.setParameter("avgRating", book.getAvgRating());
+
+        query.executeUpdate();
+/*
+        Query query = getSession().createQuery("select new map(round(avg(value)) as rating, count(value) as voteCount) from Vote v where v.book.id=:id");
+        query.setParameter("id", book.getId());
+
+        List list = query.getResultList();
+
+        HashMap<String, Object> map = (HashMap<String, Object>) list.get(0);
+
+        long voteCount = Long.valueOf(map.get("voteCount").toString());
+        int rating = Double.valueOf(map.get("rating").toString()).intValue();
+
+        query = getSession().createQuery("update Book set rating = :rating, "
+                + " voteCount = :voteCount"
+                + " where id = :id");
+
+        query.setParameter("rating", rating);
+        query.setParameter("voteCount", voteCount);
+        query.setParameter("id", book.getId());
+
+        int result = query.executeUpdate();
+*/
+
     }
 }

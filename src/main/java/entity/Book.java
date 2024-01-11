@@ -3,11 +3,10 @@ package entity;
 import jakarta.persistence.*;
 import java.io.Serializable;
 import java.util.Arrays;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+
 import lombok.RequiredArgsConstructor;
 
-@Entity
+@Entity(name = "book")
 //@NoArgsConstructor
 //@AllArgsConstructor
 @RequiredArgsConstructor
@@ -28,24 +27,24 @@ public class Book implements Serializable{
     @Basic
     @Column(name = "isbn", nullable = false, length = 100)
     private String isbn;
-//    @Basic
-//    @Column(name = "genre_id", nullable = false)
-//    private Long genreId;
-//    @Basic
-//    @Column(name = "author_id", nullable = false)
-//    private Long authorId;
     @Basic
     @Column(name = "publish_year", nullable = false)
     private Integer publishDate;
-//    @Basic
-//    @Column(name = "publisher_id", nullable = false)
-//    private Long publisherId;
     @Basic
     @Column(name = "image", nullable = true)
     private byte[] image;
     @Basic
     @Column(name = "descr", nullable = true, length = 5000)
     private String descr;
+    @Basic
+    @Column(name = "avg_rating")
+    private Integer avgRating;
+    @Basic
+    @Column(name = "total_vote_count")
+    private Long totalVoteCount;
+    @Basic
+    @Column(name = "total_rating")
+    private Long totalRating;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "genre_id", referencedColumnName = "id", nullable = false)
     private Genre genre;
@@ -105,6 +104,14 @@ public class Book implements Serializable{
         this.isbn = isbn;
     }
 
+    public Long getTotalRating() {
+        return totalRating;
+    }
+
+    public void setTotalRating(Long totalRating) {
+        this.totalRating = totalRating;
+    }
+
 //    public Long getGenreId() {
 //        return genreId;
 //    }
@@ -151,6 +158,22 @@ public class Book implements Serializable{
 
     public void setDescr(String descr) {
         this.descr = descr;
+    }
+
+    public Integer getAvgRating() {
+        return avgRating;
+    }
+
+    public void setAvgRating(Integer rating) {
+        this.avgRating = rating;
+    }
+
+    public Long getTotalVoteCount() {
+        return totalVoteCount;
+    }
+
+    public void setTotalVoteCount(Long voteCount) {
+        this.totalVoteCount = voteCount;
     }
 
     @Override

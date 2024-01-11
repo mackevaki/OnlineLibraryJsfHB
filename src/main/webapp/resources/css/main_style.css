@@ -90,7 +90,7 @@ body {
 	background-color: #e4685d;
         cursor: pointer;
 }
-body .ui-button.ui-state-hover, body .ui-button.ui-state-focus, body .ui-button.ui-state-active, body .ui-button.ui-state-down, body .ui-button.ui-button-outlined  {
+body .ui-button.ui-state-hover, body .ui-button.ui-state-focus, body .ui-button.ui-state-active, body .ui-button.ui-state-down, body .ui-button.ui-state-down, body .ui-button.ui-button-outlined  {
 	background: linear-gradient(to bottom, #e4685d 5%, #fc8d83 100%);
 	background-color: #e4685d;
         cursor: pointer;

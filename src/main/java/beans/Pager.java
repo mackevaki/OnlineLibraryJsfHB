@@ -10,7 +10,7 @@ public class Pager<T> implements Serializable {
     private int selectedPageNumber = 1; // выбранный номер страницы в постраничной навигации
     private List<T> list;
 //    private ArrayList<Integer> pageNumbers = new ArrayList<>();
-    private int rowIndex;
+//    private int rowIndex;
     private int from;
     private int to;
     
@@ -94,16 +94,16 @@ public class Pager<T> implements Serializable {
     }
 
     public void setList(List<T> list) {
-        rowIndex = -1;
+//        rowIndex = -1;
         this.list = list;
     }
     
-    public int getRowIndex() {
+ /*   public int getRowIndex() {
         rowIndex += 1;
         return rowIndex;
-    }
+    }*/
 
-    public void setRowIndex(int rowIndex) {
+/*    public void setRowIndex(int rowIndex) {
         this.rowIndex = rowIndex;
-    }
+    }*/
 }

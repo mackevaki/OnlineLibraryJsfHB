@@ -24,6 +24,10 @@
                 <h:form id="exit">                    
                     <h:commandLink action="#{user.logout()}" value="#{msg.exit}"/>
                 </h:form>
+                
+                <h:form>
+                    <p:commandLink value="#{msg.feedback}" action="#{mailController.showMailForm()}" styleClass="feedback" update=":formSendMail"/>
+                </h:form>
             </div>
             
             <div class="search">

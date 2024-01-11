@@ -62,9 +62,9 @@
 .ui-datatable.books_list .ui-datatable-data-empty td {
     border-style: none;
     white-space: normal;
-    padding:0;
+    padding:2px;
     background:none;
-    color: crimson;
+    color: #bf3f34;
 }
 .ui-datatable-tablewrapper {
     overflow: auto;
@@ -155,7 +155,9 @@ body .ui-paginator .ui-paginator-current, body .ui-paginator .ui-paginator-rpp-o
     display: inline-block;
     vertical-align: middle;
     font-size: 14px;
-    padding: 2px;
+    padding-left: 5px;
+    width: 40px;
+    height: 30px;
 }
 .box-sh {padding-right: 40px; overflow: hidden; }
 .box-sh h1 {float: left; color: #009999; font-size: 30px; margin-left: 39px; margin-top: 28px;}
@@ -181,13 +183,13 @@ a img {
     background-color: antiquewhite;
     color: #8e3c40;
     width: 1000px;
-    height: 100%;
+    /*height: 100%;*/
     margin: 0 auto;
     padding: 20px;	
 }
 .sidebar1 {
     float: left;
-    color: crimson;
+    color: #bf3f34;
     width: 25%;
     padding-bottom: 10px;
     margin: 10px;    
@@ -197,7 +199,7 @@ h4 {
 }
 .content {
     float: left;
-    color: crimson;
+    color: #bf3f34;
     padding: 10px 0;
     width: 75%;
 }
@@ -235,10 +237,10 @@ body {
     font-style: normal;
     font-weight: normal;
     background-color: #FFF;
-    margin: 100px;
+    margin: 0px;
 }
 .header {
-    color: crimson;
+    color: #bf3f34;
     text-align: left;
     font-size: 18px;
     font-weight: bold;
@@ -262,14 +264,14 @@ body {
     width: 18%;
     padding-bottom: 10px;
     margin: 10px;
-    color: crimson;
+    color: #bf3f34;
 }
 .title{
     float: left;
     width: 300px;
     text-align: left;
     padding-top: 50px;
-    color: crimson;
+    color: #bf3f34;
 /*    font-size: 18px;*/
 /*    font-weight: bold;*/
 }
@@ -372,7 +374,7 @@ body {
     width: 700px;
 }
 .book_list h3{
-    color: crimson;
+    color: #bf3f34;
     text-align: center;
     padding: 0;
     margin: 0;
@@ -494,7 +496,7 @@ body {
 }
 .col1{
     vertical-align: auto;
-    width: 135px;
+    width: 155px;
     margin-top: 20px;
 }
 .col2 a{
@@ -507,7 +509,7 @@ body {
     width: 280px;
 }
 .col2 p{
-    font-size: 13px;
+    font-size: 15px;
 }
 .name_edit{
     width: 150px;
@@ -547,9 +549,10 @@ body .ui-fileupload .ui-fileupload-buttonbar {border-bottom: none; border-left: 
     width: 50%;
 }
 .rating{
-    float:left;
-    margin-top:5px;
-}
+     float:left;
+     margin-top:5px;
+     width: 150px;
+ }
 .image-info table{
     margin-left: 20px;
     margin-top:0px;
@@ -559,10 +562,7 @@ body .ui-fileupload .ui-fileupload-buttonbar {border-bottom: none; border-left: 
     border:0;
     vertical-align: bottom;
 }
-.vote-count{
-    color:#b2b2b2;
-    margin-left: 5px;
-}
+
 .tooltip{
     width:500px;
 }
@@ -636,8 +636,31 @@ body .ui-panelgrid .ui-panelgrid-cell {
 }
 body .ui-dialog .ui-dialog-titlebar {
     background: #ffffff;
-    color: #495057;
+    color: #d32f2fad;
     font-weight: 700;
     border-bottom: 0 none;
     padding: 10px;
+}
+
+element.style {
+}
+body .ui-panelgrid .ui-panelgrid-cell.ui-widget-header {
+    border: 1px solid #dee2e6;
+    background: #f8f9fa;
+    color: #495057;
+    padding: 5px;
+}
+.vote-count{
+    color:#009999;
+    font-size: 12px;
+}
+.rating.star-rating, rating.star-rating a {
+    width:9px;
+    height:9px;
+}
+body .ui-rating .ui-rating-star a {
+    /*font-size: 1rem;*/
+    color: #007171;
+    /*height: 10px;*/
+    /*width: 9px;*/
 }

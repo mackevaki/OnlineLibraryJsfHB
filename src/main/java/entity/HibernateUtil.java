@@ -4,22 +4,25 @@ import org.hibernate.SessionFactory;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.cfg.Configuration;
 
 public class HibernateUtil {
     private static SessionFactory sessionFactory;
     
     static {
-	final StandardServiceRegistry registry = new StandardServiceRegistryBuilder()
+/*	final StandardServiceRegistry registry = new StandardServiceRegistryBuilder()
 			.configure() // configures settings from hibernate.cfg.xml
-			.build();
+			.build();*/
 	try {
-		sessionFactory = new MetadataSources( registry ).buildMetadata().buildSessionFactory();
+        Configuration configuration = new Configuration();
+//        configuration.configure();
+		sessionFactory = configuration.configure().buildSessionFactory();//= new MetadataSources( registry ).buildMetadata().buildSessionFactory();
 	}
 	catch (Exception e) {
             e.printStackTrace();
 		// The registry would be destroyed by the SessionFactory, but we had trouble building the SessionFactory
 		// so destroy it manually.
-            StandardServiceRegistryBuilder.destroy( registry );
+//            StandardServiceRegistryBuilder.destroy( registry );
 	}
     }
     

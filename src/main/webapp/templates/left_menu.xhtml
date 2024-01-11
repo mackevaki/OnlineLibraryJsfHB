@@ -17,6 +17,10 @@
                             <f:ajax onevent="showProgress" event="click" render=":booksForm:booksList @form :lettersForm :pages1 :pages2 :booksCount" listener="#{bookListController.fillBooksByGenre()}"/>
                         </h:commandLink>
                     </ui:repeat>
+                    <h:commandLink value="#{msg.all_genres}" styleClass="#{g.id == bookListController.selectedGenreId ? 'selected_link' : ''}">
+                        <f:param name="genre_id" value="0"/>
+                        <f:ajax onevent="showProgress" event="click" render=":booksForm:booksList @form :lettersForm :pages1 :pages2 :booksCount" listener="#{bookListController.fillBooksByGenre()}"/>
+                    </h:commandLink>
                 </h:form>
         </ui:composition>
     </h:body>

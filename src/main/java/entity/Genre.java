@@ -5,7 +5,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import lombok.*;
 
-@Entity
+@Entity(name = "genre")
 @RequiredArgsConstructor
 @Getter
 @Setter

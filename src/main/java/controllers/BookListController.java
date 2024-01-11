@@ -2,14 +2,12 @@ package controllers;
 
 import beans.Pager;
 import db.DataHelper;
-import entity.Author;
-import entity.Book;
-import entity.Genre;
-import entity.Publisher;
+import entity.*;
 import enums.SearchType;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.faces.application.FacesMessage;
+import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.event.ActionEvent;
 import jakarta.faces.event.ActionListener;
@@ -21,6 +19,7 @@ import java.util.ResourceBundle;
 import models.BookListDataModel;
 import org.omnifaces.cdi.Eager;
 import org.primefaces.PrimeFaces;
+import org.primefaces.event.RateEvent;
 import org.primefaces.model.LazyDataModel;
 
 @Named("bookListController")
@@ -38,11 +37,11 @@ public class BookListController implements Serializable {
     private String searchString; // хранит поисковую строку
 
     private final Pager<Book> pager = Pager.getInstance();
-    private DataHelper dataHelper = DataHelper.getInstance();
+    private final DataHelper dataHelper = DataHelper.getInstance();
     private LazyDataModel<Book> bookListModel;
     
     private boolean editModeView; // отображение режима редактирования
-    private boolean addModeView;// отображение режима добавления
+    private boolean addModeView; // отображение режима добавления
 
     public BookListController() {
         bookListModel = new BookListDataModel();  
@@ -66,10 +65,15 @@ public class BookListController implements Serializable {
         cancelEdit();
         
         Map<String, String> params = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
-        
-        submitValues(' ', Integer.valueOf(params.get("genre_id")));
-        
-        dataHelper.getBooksByGenre(selectedGenreId);
+
+        Integer genreId = Integer.valueOf(params.get("genre_id"));
+        submitValues(' ', genreId);
+
+        if (genreId == 0) {
+            dataHelper.getAllBooks();
+        } else {
+            dataHelper.getBooksByGenre(selectedGenreId);
+        }
         
         return "books";
     }
@@ -152,6 +156,7 @@ public class BookListController implements Serializable {
      
     public void cancelEdit() {
         editModeView = false;
+        addModeView = false;
         PrimeFaces.current().executeScript("PF('dlgEditBook').hide()");
     }
 //</editor-fold>
@@ -240,28 +245,22 @@ public class BookListController implements Serializable {
                 || isNullOrEmpty(selectedBook.getPageCount())
                 || isNullOrEmpty(selectedBook.getPublishDate())
                 || isNullOrEmpty(selectedBook.getPublisher())) {
-//            ResourceBundle bundle = ResourceBundle.getBundle("nls.messages", FacesContext.getCurrentInstance().getViewRoot().getLocale());
             failValidation(bundle.getString("error_fill_all_fields"));
             return false;
         }
                 
         if (dataHelper.isIsbnExists(selectedBook.getIsbn(), selectedBook.getId())){
-//            ResourceBundle bundle = ResourceBundle.getBundle("nls.messages", FacesContext.getCurrentInstance().getViewRoot().getLocale());
             failValidation(bundle.getString("error_isbn_exist"));
             return false;            
         }
 
         if (addModeView) {
             if (selectedBook.getContent() == null) {
-//                ResourceBundle bundle = ResourceBundle.getBundle("nls.messages", FacesContext.getCurrentInstance().getViewRoot().getLocale());
-
                 failValidation(bundle.getString("error_load_pdf"));
                 return false;
             }
 
             if (selectedBook.getImage() == null) {
-//                ResourceBundle bundle = ResourceBundle.getBundle("nls.messages", FacesContext.getCurrentInstance().getViewRoot().getLocale());
-
                 failValidation(bundle.getString("error_load_image"));
                 return false;
             }
@@ -269,6 +268,51 @@ public class BookListController implements Serializable {
 
         return true;
     }
+
+    public void rate(RateEvent rateEvent) {
+        ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
+
+        Map<String, String> params = externalContext.getRequestParameterMap();
+        int bookId = Integer.parseInt(params.get("bookId"));
+
+        Book book = null;
+        for(Book b : bookListModel.getWrappedData()) {
+            if(b.getId() == bookId) {
+                book = b;
+            }
+        }
+
+        String username = externalContext.getUserPrincipal().getName();
+        int votedRating = Integer.parseInt(rateEvent.getRating().toString());
+        long voteCount = book.getTotalVoteCount() + 1;
+        long rating = book.getTotalRating() + votedRating;
+        int avgRating = calcAverageRating(rating, voteCount);
+
+        book.setTotalVoteCount(voteCount);
+        book.setAvgRating(avgRating);
+        book.setTotalRating(rating);
+
+        Vote vote = new Vote();
+        vote.setBook(book);
+        vote.setUsername(username);
+        vote.setValue(votedRating);
+
+        dataHelper.rateBook(book, vote);
+
+        PrimeFaces.current().ajax().update("booksForm:booksList"); // обновляем список книг
+
+    }
+
+    private int calcAverageRating(long totalRating, long totalVoteCount) {
+        if (totalRating == 0 || totalVoteCount == 0) {
+            return 0;
+        }
+
+        int avgRating = Long.valueOf(totalRating / totalVoteCount).intValue();
+
+        return avgRating;
+    }
+
 
     private boolean isNullOrEmpty(Object obj) {
 //        if (obj instanceof Genre) {

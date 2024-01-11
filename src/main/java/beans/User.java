@@ -22,7 +22,7 @@ public class User implements Serializable {
 
     public String login() {
         try {
-            Thread.sleep(1000); // immitation of loading
+            Thread.sleep(1000); // imitation of loading
             
             HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
             if (request.getSession(false) != null){

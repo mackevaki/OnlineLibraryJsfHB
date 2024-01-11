@@ -17,11 +17,11 @@
 -->
 <glassfish-web-app error-url="">
   <security-role-mapping>
-    <role-name>ADMIN</role-name>
+    <role-name>admin</role-name>
     <group-name>admin</group-name>
   </security-role-mapping>
   <security-role-mapping>
-    <role-name>USER</role-name>
+    <role-name>user</role-name>
     <group-name>user</group-name>
   </security-role-mapping>
   <class-loader delegate="true"/>
