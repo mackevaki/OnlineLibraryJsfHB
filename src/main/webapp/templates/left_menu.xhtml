@@ -3,7 +3,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:f="http://java.sun.com/jsf/core">
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
     <h:head>
         <h:outputStylesheet library="css" name="lib_style.css"  />
     </h:head>
@@ -12,15 +13,15 @@
             <h4>#{msg.genres}</h4>
             <h:form id="genresForm" styleClass="genres">
                     <ui:repeat value="#{genreController.genreList}" var="g">
-                        <h:commandLink value="#{g.name}" styleClass="#{g.id == bookListController.selectedGenreId ? 'selected_link' : ''}">
+                        <p:commandLink value="#{g.name}" styleClass="#{g.id == bookListController.selectedGenreId ? 'selected_link' : ''}" action="#{bookListController.fillBooksByGenre()}">
                             <f:param name="genre_id" value="#{g.id}"/>
-                            <f:ajax onevent="showProgress" event="click" render=":booksForm:booksList @form :lettersForm :pages1 :pages2 :booksCount" listener="#{bookListController.fillBooksByGenre()}"/>
-                        </h:commandLink>
+                            <f:ajax onevent="showProgress" event="click" render=":booksForm:booksList @form :lettersForm :pages1 :pages2 :booksCount :genresForm" />
+                        </p:commandLink>
                     </ui:repeat>
-                    <h:commandLink value="#{msg.all_genres}" styleClass="#{g.id == bookListController.selectedGenreId ? 'selected_link' : ''}">
+                    <p:commandLink value="#{msg.all_genres}" styleClass="#{bookListController.selectedGenreId == 0 ? 'selected_link' : ''}" action="#{bookListController.fillBooksByGenre()}">
                         <f:param name="genre_id" value="0"/>
-                        <f:ajax onevent="showProgress" event="click" render=":booksForm:booksList @form :lettersForm :pages1 :pages2 :booksCount" listener="#{bookListController.fillBooksByGenre()}"/>
-                    </h:commandLink>
+                        <f:ajax onevent="showProgress" event="click" render=":booksForm:booksList @form :lettersForm :pages1 :pages2 :booksCount :genresForm" />
+                    </p:commandLink>
                 </h:form>
         </ui:composition>
     </h:body>

@@ -4,12 +4,15 @@ import jakarta.persistence.*;
 import java.io.Serializable;
 import java.util.Arrays;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 @Entity(name = "book")
 //@NoArgsConstructor
 //@AllArgsConstructor
 @RequiredArgsConstructor
+@Getter @Setter
 public class Book implements Serializable{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
@@ -45,6 +48,9 @@ public class Book implements Serializable{
     @Basic
     @Column(name = "total_rating")
     private Long totalRating;
+    @Basic
+    @Column(name = "view_count")
+    private Long viewCount;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "genre_id", referencedColumnName = "id", nullable = false)
     private Genre genre;
@@ -55,126 +61,6 @@ public class Book implements Serializable{
     @JoinColumn(name = "publisher_id", referencedColumnName = "id", nullable = false)
     private Publisher publisher;
     private boolean edit;
-    
-    public boolean isEdit() {
-        return edit;
-    }
-
-    public void setEdit(boolean edit) {
-        this.edit = edit;
-    }
-    
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public byte[] getContent() {
-        return content;
-    }
-
-    public void setContent(byte[] content) {
-        this.content = content;
-    }
-
-    public Integer getPageCount() {
-        return pageCount;
-    }
-
-    public void setPageCount(Integer pageCount) {
-        this.pageCount = pageCount;
-    }
-
-    public String getIsbn() {
-        return isbn;
-    }
-
-    public void setIsbn(String isbn) {
-        this.isbn = isbn;
-    }
-
-    public Long getTotalRating() {
-        return totalRating;
-    }
-
-    public void setTotalRating(Long totalRating) {
-        this.totalRating = totalRating;
-    }
-
-//    public Long getGenreId() {
-//        return genreId;
-//    }
-//
-//    public void setGenreId(Long genreId) {
-//        this.genreId = genreId;
-//    }
-//
-//    public Long getAuthorId() {
-//        return authorId;
-//    }
-//
-//    public void setAuthorId(Long authorId) {
-//        this.authorId = authorId;
-//    }
-
-    public Integer getPublishDate() {
-        return publishDate;
-    }
-
-    public void setPublishDate(Integer publishDate) {
-        this.publishDate = publishDate;
-    }
-
-//    public Long getPublisherId() {
-//        return publisherId;
-//    }
-//
-//    public void setPublisherId(Long publisherId) {
-//        this.publisherId = publisherId;
-//    }
-
-    public byte[] getImage() {
-        return image;
-    }
-
-    public void setImage(byte[] image) {
-        this.image = image;
-    }
-
-    public String getDescr() {
-        return descr;
-    }
-
-    public void setDescr(String descr) {
-        this.descr = descr;
-    }
-
-    public Integer getAvgRating() {
-        return avgRating;
-    }
-
-    public void setAvgRating(Integer rating) {
-        this.avgRating = rating;
-    }
-
-    public Long getTotalVoteCount() {
-        return totalVoteCount;
-    }
-
-    public void setTotalVoteCount(Long voteCount) {
-        this.totalVoteCount = voteCount;
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -188,10 +74,7 @@ public class Book implements Serializable{
         if (!Arrays.equals(content, book.content)) return false;
         if (pageCount != null ? !pageCount.equals(book.pageCount) : book.pageCount != null) return false;
         if (isbn != null ? !isbn.equals(book.isbn) : book.isbn != null) return false;
-//        if (genreId != null ? !genreId.equals(book.genreId) : book.genreId != null) return false;
-//        if (authorId != null ? !authorId.equals(book.authorId) : book.authorId != null) return false;
         if (publishDate != null ? !publishDate.equals(book.publishDate) : book.publishDate != null) return false;
-//        if (publisherId != null ? !publisherId.equals(book.publisherId) : book.publisherId != null) return false;
         if (!Arrays.equals(image, book.image)) return false;
         if (descr != null ? !descr.equals(book.descr) : book.descr != null) return false;
 
@@ -205,36 +88,9 @@ public class Book implements Serializable{
         result = 31 * result + Arrays.hashCode(content);
         result = 31 * result + (pageCount != null ? pageCount.hashCode() : 0);
         result = 31 * result + (isbn != null ? isbn.hashCode() : 0);
-//        result = 31 * result + (genreId != null ? genreId.hashCode() : 0);
-//        result = 31 * result + (authorId != null ? authorId.hashCode() : 0);
         result = 31 * result + (publishDate != null ? publishDate.hashCode() : 0);
-//        result = 31 * result + (publisherId != null ? publisherId.hashCode() : 0);
         result = 31 * result + Arrays.hashCode(image);
         result = 31 * result + (descr != null ? descr.hashCode() : 0);
         return result;
-    }
-
-    public Genre getGenre() {
-        return genre;
-    }
-
-    public void setGenre(Genre genre) {
-        this.genre = genre;
-    }
-
-    public Author getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(Author author) {
-        this.author = author;
-    }
-
-    public Publisher getPublisher() {
-        return publisher;
-    }
-
-    public void setPublisher(Publisher publisher) {
-        this.publisher = publisher;
     }
 }

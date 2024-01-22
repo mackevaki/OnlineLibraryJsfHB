@@ -10,22 +10,26 @@
     </h:head>
     <h:body>
         <ui:composition>
-                 <p:growl life="3000" id="growlMessage" globalOnly="true"/> 
+                <p:growl life="3000" id="growlMessage" globalOnly="true"/>
                 <p:dialog styleClass="editDialog" modal="true" widgetVar="dlgEditBook" dynamic="true" resizable="false" header="#{msg.edit_book}" closable="false" >
                     <p:panelGrid columns="2" columnClasses="col1, col2" styleClass="edit_book_table" >
                         <p:panel id="imagePanel">
-                            <p:graphicImage  value="#{imageController.defaultImage}" width="110" height="150" id="bookImage"  rendered="#{bookListController.editModeView}"/>
+                            <p:graphicImage value="#{bookListController.selectedBook.image}"
+                                            width="110" height="150" id="bookImage"
+                                            rendered="#{bookListController.editModeView}"/>
                             <h:form enctype="multipart/form-data" id="formUploadImage" >
-                                <p:fileUpload id="imageUpload" label="#{msg.load}" listener="#{imageController.handleFileUpload}" update="bookNewImage" sizeLimit="#{imageController.imageMaxSize}" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" multiple="false" auto="true"/>  
-                                <p:graphicImage cache="false" value="#{imageController.uploadedImage}" library="images" width="110" height="150" id="bookNewImage"/>
+                                <p:fileUpload id="imageUpload" label="#{msg.load}" listener="#{bookListController.uploadImage}"
+                                              update="bookNewImage" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" multiple="false" auto="true"/>
+                                <p:graphicImage cache="false" value="#{bookListController.uploadedImage}" library="images"
+                                                width="110" height="150" id="bookNewImage" rendered="#{not empty bookListController.uploadedImage}"/>
                                 <p:autoUpdate id="messagesImage"/>
                             </h:form>
 
                             <h:form enctype="multipart/form-data" id="formUploadPdf">
-                                <p:fileUpload  id="pdfUpload" label="#{msg.load_pdf}" listener="#{contentController.handleFileUpload}" update="@form" allowTypes="/(\.|\/)(pdf)$/" multiple="false" auto="true" styleClass="pdf-upload"/>  
-                                <h:outputLink id="uploadedPdfLink" value="#{request.contextPath}/UploadedPdf"  target="_blank" styleClass="pdf-link" rendered="#{contentController.showContent}">                                                             
-                                    <p:outputLabel value="#{msg.show_uploaded_pdf}"/>
-                                </h:outputLink> 
+                                <p:fileUpload  id="pdfUpload" label="#{msg.load_pdf}" listener="#{bookListController.uploadContent}" update="@form"
+                                               allowTypes="/(\.|\/)(pdf)$/" multiple="false" auto="true" styleClass="pdf-upload"/>
+                                <h:outputLabel id="uploadedPdfLink" value="#{bookListController.uploadedContentName}"   />
+
                                 <p:autoUpdate id="messages-pdf"/>
                           </h:form>
                         </p:panel>   
@@ -77,14 +81,10 @@
                                 <f:facet name="footer">
                                     <h:messages styleClass="error"/>    
                                     
-                                    <p:commandButton styleClass="button-update" value="#{msg.save}"  onclick="this.disabled=true;" update=":imagePanel :formEditBook :booksForm:booksList :booksCount :growlMessage">
-                                        <f:actionListener binding="#{imageController.saveListener()}"/>     
-                                        <f:actionListener binding="#{contentController.saveListener()}"/>
-                                        <f:actionListener binding="#{bookListController.saveListener()}"/>     
+                                    <p:commandButton styleClass="button-update" value="#{msg.save}" actionListener="#{bookListController.save}"
+                                                     onclick="this.disabled=true;" update=":imagePanel :formEditBook :booksForm:booksList :booksCount :growlMessage">
                                     </p:commandButton>
-                                    <p:commandButton action="#{bookListController.cancelEdit()}" value="#{msg.cancel}" immediate="true" global="false">    
-                                        <f:actionListener binding="#{imageController.clearListener()}"/>     
-                                        <f:actionListener binding="#{contentController.clearListener()}"/>
+                                    <p:commandButton action="#{bookListController.cancelEdit()}" value="#{msg.cancel}" immediate="true" global="false">
                                     </p:commandButton>
                                 </f:facet>
                                 </p:panelGrid>

@@ -11,6 +11,9 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import lombok.Getter;
+import lombok.Setter;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
@@ -18,8 +21,9 @@ import org.primefaces.model.StreamedContent;
 
 @Named(value = "imageController")
 @SessionScoped
+@Getter @Setter
 public class ImageController implements Serializable {
-    private final int IMAGE_MAX_SIZE = 204800;
+/*    private final int IMAGE_MAX_SIZE = 204800;
     private byte[] uploadedImage;
     
     @Inject
@@ -28,14 +32,6 @@ public class ImageController implements Serializable {
     public ImageController() {
     }
 
-    public BookListController getBookListController() {
-        return bookListController;
-    }
-
-    public void setBookListController(BookListController bookListController) {
-        this.bookListController = bookListController;
-    }
-    
     public StreamedContent getDefaultImage() {
         return getStreamedContent(bookListController.getSelectedBook().getImage());
     }
@@ -61,14 +57,6 @@ public class ImageController implements Serializable {
         } 
         return null;
     }
-    
-    public int getImageMaxSize() {
-        return IMAGE_MAX_SIZE;
-    }
-
-    public byte[] getUploadedImageBytes() {
-        return uploadedImage;
-    }
 
     public ActionListener saveListener() {
         return (ActionEvent event) -> {
@@ -78,14 +66,16 @@ public class ImageController implements Serializable {
             clear();
         };
     }
-    
+
     public ActionListener clearListener() {
-        return (ActionEvent event) -> {
-            clear();
-        };
+        return (ActionEvent event) -> clear();
     }
 
     public void clear() {
         uploadedImage = null;
-    }    
+    }
+
+    public int getImageMaxSize() {
+        return IMAGE_MAX_SIZE;
+    }*/
 }

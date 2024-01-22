@@ -1,35 +1,46 @@
 package controllers;
 
-import db.DataHelper;
+import dao.impls.GenreService;
 import entity.Genre;
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.SessionScoped;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.convert.Converter;
 import jakarta.faces.model.SelectItem;
+import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import lombok.Getter;
+import lombok.Setter;
 import org.omnifaces.cdi.Eager;
 
+import java.io.Serializable;
+import java.util.*;
+
 @Named("genreController")
-@ApplicationScoped
+@SessionScoped
 @Eager
-public class GenreController implements Serializable, Converter {
+@Getter @Setter
+public class GenreController implements Serializable, Converter<Genre> {
     private List<Genre> genreList; 
     private List<SelectItem> selectItems = new ArrayList<>();
     private Map<Long, Genre> genreMap;
-    
-    public GenreController() {
-        genreMap = new HashMap<Long, Genre>();
-        genreList = DataHelper.getInstance().getAllGenres();
+
+    private GenreService genreService;
+    private FacesContext facesContext;
+
+    @Inject
+    public GenreController(GenreService genreService, FacesContext facesContext) {
+        this.genreService = genreService;
+        this.facesContext = facesContext;
+    }
+
+    @PostConstruct
+    public void init() {
+        genreMap = new HashMap<>();
+        genreList = genreService.findAll(Genre.class);
         
-        Collections.sort(genreList, Comparator.comparing(Genre::toString));
+        genreList.sort(Comparator.comparing(Genre::toString));
         
 //        genreList.add(0, createEmptyGenre());
 
@@ -38,29 +49,25 @@ public class GenreController implements Serializable, Converter {
             selectItems.add(new SelectItem(genre, genre.getName()));
         }        
     }
-    
-    public List<Genre> getGenreList() {
-        return genreList;
-    }
-    
-    public List<SelectItem> getSelectItems() {
-        return selectItems;
-    }
 
     @Override
-    public Object getAsObject(FacesContext context, UIComponent component, String value) {
+    public Genre getAsObject(FacesContext context, UIComponent component, String value) {
         return genreMap.get(Long.valueOf(value));
     }
 
     @Override
-    public String getAsString(FacesContext context, UIComponent component, Object value) {
-        return ((Genre) value).getId().toString();
+    public String getAsString(FacesContext context, UIComponent component, Genre value) {
+        return value.getId().toString();
     }
-    
-//    private Genre createEmptyGenre() {
-//        Genre genre = new Genre();
-//        genre.setId(-1L);
-//        genre.setName("");
-//        return genre;
-//    }
+
+    public List<Genre> find(String name) {
+        return genreService.findByName(name);
+    }
+
+/*    private Genre createEmptyGenre() {
+        Genre genre = new Genre();
+        genre.setId(-1L);
+        genre.setName("");
+        return genre;
+    }*/
 }

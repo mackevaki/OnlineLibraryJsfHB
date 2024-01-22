@@ -4,7 +4,9 @@
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:f="http://xmlns.jcp.org/jsf/core"
-      xmlns:p="http://primefaces.org/ui">
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:o="http://omnifaces.org/ui"
+>
     <head>
         <title>#{msg.index_title}</title>
     </head>
@@ -12,7 +14,7 @@
         <ui:composition template="/templates/library_template.xhtml">
             <ui:define name="books_count">
                 <div class="box-sh">
-                    <h1><p:outputLabel id="booksCount" value="#{msg.book_count}  #{bookListController.pager.totalBooksCount}" ></p:outputLabel></h1>
+                    <h1><p:outputLabel id="booksCount" value="#{msg.book_count} #{bookListController.pager.totalBooksCount}"/></h1>
 
                     <h:form id="add-action" rendered="#{request.isUserInRole('admin')}">
                         <p:commandLink  actionListener="#{bookListController.switchAddMode}" update=":imagePanel :formEditBook :formUploadImage :formUploadPdf">
@@ -32,11 +34,12 @@
                 
                 <h:form id="booksForm">
                    
-                    <p:dataTable id="booksList" lazy="true" value="#{bookListController.bookListModel}" var="b" styleClass="books_list"  paginator="true" rows="5" 
-                                 rowsPerPageTemplate="5,10,15" paginatorTemplate="{RowsPerPageDropdown} {PageLinks}"  paginatorAlwaysVisible="false" emptyMessage="" > 
+                    <p:dataTable id="booksList" lazy="true" value="#{bookListController.bookLazyDataModel}" var="b" styleClass="books_list"  paginator="true" rows="5"
+                                 rowIndexVar="rowIndexVar" rowsPerPageTemplate="5,10,15" paginatorTemplate="{RowsPerPageDropdown} {PageLinks}" paginatorAlwaysVisible="false" emptyMessage="" >
                         <p:column styleClass="col1">
                             <h:outputLink value="#{request.contextPath}/PdfContent?id=#{b.id}" target="_blank">
-                                <p:graphicImage value="/ShowImage?index=#{requestController.incrementBookIndex}" cache="false" width="120" height="160" />
+                                <o:graphicImage cache="false" value="#{b.image}" dataURI="true" width="120"
+                                                height="160"/>
                                 <f:param name="id" value="#{b.id}"/>
                             </h:outputLink>
 
@@ -59,7 +62,7 @@
                             <div class="book_info">
                                 <p> 
                                     <h:outputLink value="#{request.contextPath}/PdfContent" target="_blank" >
-                                        <h:outputText value="#{b.name}"></h:outputText>
+                                        <h:outputText value="#{b.name}"/>
                                         <f:param name="id" value="#{b.id}" />
                                     </h:outputLink>
                                 </p>
@@ -124,14 +127,11 @@
                         <h:panelGrid columns="2" style="margin:0 auto; width:150px;">
                             <p:commandButton id="btnDeletedBook" value="#{msg.yes}" action="#{bookListController.deleteBook}" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" update=":formEditBook :booksForm:booksList :booksCount :growlMessage" onclick="PF('dlgDeleteBook').hide()"/>  
                             <p:commandButton value="#{msg.no}" styleClass="ui-confirmdialog-no" icon="ui-icon-close" onclick="PF('dlgDeleteBook').hide()" type="button" immediate="true" global="false">
-                                    <f:actionListener binding="#{imageController.clearListener()}"/>     
-                                    <f:actionListener binding="#{contentController.clearListener()}"/>     
                             </p:commandButton>
                         </h:panelGrid>
                     </p:confirmDialog>
                 </h:form>
             </ui:define>
-
         </ui:composition>
     </h:body>
 </html>

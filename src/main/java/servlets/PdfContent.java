@@ -1,6 +1,7 @@
 package servlets;
 
-import db.DataHelper;
+import db.BookService;
+import jakarta.inject.Inject;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -12,7 +13,8 @@ import java.net.URLEncoder;
 
 @WebServlet(name = "PdfContent", urlPatterns = {"/PdfContent"})
 public class PdfContent extends HttpServlet {
-
+    @Inject
+    private BookService bookService;
     
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -28,11 +30,11 @@ public class PdfContent extends HttpServlet {
         response.setContentType("application/pdf");
         
         try ( OutputStream out = response.getOutputStream()) {
-            long id = Long.valueOf(request.getParameter("id"));
-            Boolean save = Boolean.valueOf(request.getParameter("save"));
+            long id = Long.parseLong(request.getParameter("id"));
+            boolean save = Boolean.parseBoolean(request.getParameter("save"));
             String filename = request.getParameter("filename");
             System.out.println("save=" + save);            
-            byte[] content = DataHelper.getInstance().getContent(id);
+            byte[] content = bookService.getContent(id);
             response.setContentLength(content.length);
             if (save) {
                 response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(filename, "UTF-8") +".pdf");

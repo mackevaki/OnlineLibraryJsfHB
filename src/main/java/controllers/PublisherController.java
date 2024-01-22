@@ -1,55 +1,62 @@
 package controllers;
 
-import db.DataHelper;
+import dao.impls.PublisherService;
 import entity.Publisher;
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.SessionScoped;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.convert.Converter;
 import jakarta.faces.model.SelectItem;
+import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Named("publisherController")
-@ApplicationScoped
-public class PublisherController implements Serializable, Converter {
+@SessionScoped
+@Getter @Setter
+public class PublisherController implements Serializable, Converter<Publisher> {
     private List<Publisher> publisherList;
     private Map<Long, Publisher> publisherMap;
     private List<SelectItem> selectItems = new ArrayList<>();
 
-    public PublisherController() {
-        publisherList = DataHelper.getInstance().getAllPublishers();
+    private FacesContext facesContext;
+    private PublisherService publisherService;
+
+    @Inject
+    public PublisherController(FacesContext facesContext, PublisherService publisherService) {
+        this.facesContext = facesContext;
+        this.publisherService = publisherService;
+    }
+
+    @PostConstruct
+    public void init() {
+        publisherList = publisherService.findAll(Publisher.class);//DataHelper.getInstance().getAllPublishers();
         publisherMap = new HashMap<>();
         
-        Collections.sort(publisherList, Comparator.comparing(Publisher::toString));
+        publisherList.sort(Comparator.comparing(Publisher::toString));
         
         for (Publisher publisher : publisherList) {
             publisherMap.put(publisher.getId(), publisher);
             selectItems.add(new SelectItem(publisher, publisher.getName()));
         }
     }
-
-    public List<Publisher> getPublisherList() {
-        return publisherList;
-    }
-
-    public List<SelectItem> getSelectItems() {
-        return selectItems;
-    }
     
     @Override
-    public Object getAsObject(FacesContext context, UIComponent component, String value) {
+    public Publisher getAsObject(FacesContext context, UIComponent component, String value) {
         return publisherMap.get(Long.valueOf(value));
     }
 
     @Override
-    public String getAsString(FacesContext context, UIComponent component, Object value) {
-        return ((Publisher)value).getId().toString();
+    public String getAsString(FacesContext context, UIComponent component, Publisher value) {
+        return value.getId().toString();
+    }
+
+    public List<Publisher> find(String str) {
+        return publisherService.findByName(str);
     }
 }

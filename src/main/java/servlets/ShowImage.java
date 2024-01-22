@@ -7,13 +7,15 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.primefaces.model.LazyDataModel;
+
 import java.io.IOException;
 import java.io.OutputStream;
 
 
 public class ShowImage extends HttpServlet {
     @Inject
-    BookListController bookListController;
+    LazyDataModel<Book> dataModel;
     
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -29,7 +31,7 @@ public class ShowImage extends HttpServlet {
         response.setContentType("image/jpeg");
         try (OutputStream out = response.getOutputStream()) {
             int index = Integer.valueOf(request.getParameter("index"));           
-            byte[] image = ((Book)bookListController.getPager().getList().get(index)).getImage(); 
+            byte[] image = dataModel.getWrappedData().get(index).getImage();//((Book)bookListController.getPager().getList().get(index)).getImage();
             response.setContentLength(image.length);
             out.write(image);
         }        

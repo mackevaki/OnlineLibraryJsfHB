@@ -1,26 +1,38 @@
 package models;
 
 import beans.Pager;
-import db.DataHelper;
+import db.BookService;
 import entity.Book;
+
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-import org.primefaces.PrimeFaces;
+import jakarta.enterprise.context.SessionScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import org.primefaces.model.FilterMeta;
 import org.primefaces.model.LazyDataModel;
 import org.primefaces.model.SortMeta;
-
-public class BookListDataModel extends LazyDataModel<Book> {
+// модель для постраничного вывода списка значений
+// можно применять не только к книгам, но и к любым типам данных
+@Named
+@SessionScoped
+public class BookListDataModel extends LazyDataModel<Book>  implements Serializable {
     private List<Book> bookList;
-    private DataHelper dataHelper = DataHelper.getInstance();
+    private BookService bookService; //= DataHelper.getInstance();
     private Pager pager = Pager.getInstance();
-    
-    public BookListDataModel() {}
+    private BookSearchValues bookSearchValues; // параметры поиска
+
+    @Inject
+    public BookListDataModel(BookService bookService, BookSearchValues bookSearchValues) {
+        this.bookService = bookService;
+        this.bookSearchValues = bookSearchValues;
+    }
 
     @Override
     public int count(Map<String, FilterMeta> filterBy) {
-        return 0;//(int) bookList.stream().count();    
+        return 0;//(int) bookList.stream().count();
     }
 
     @Override
@@ -43,7 +55,7 @@ public class BookListDataModel extends LazyDataModel<Book> {
         pager.setFrom(first);
         pager.setTo(pageSize);
         
-        dataHelper.populateList();
+        bookService.populateList();
         
         this.setRowCount(pager.getTotalBooksCount());
         

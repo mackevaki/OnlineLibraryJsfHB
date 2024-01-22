@@ -1,9 +1,15 @@
 package beans;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter @Setter
+@AllArgsConstructor
 public class Pager<T> implements Serializable {
     private int totalBooksCount; // общее кол-во книг (не на текущей странице, а всего), для постраничности
 //    private int booksOnPage = 5;
@@ -94,16 +100,6 @@ public class Pager<T> implements Serializable {
     }
 
     public void setList(List<T> list) {
-//        rowIndex = -1;
         this.list = list;
     }
-    
- /*   public int getRowIndex() {
-        rowIndex += 1;
-        return rowIndex;
-    }*/
-
-/*    public void setRowIndex(int rowIndex) {
-        this.rowIndex = rowIndex;
-    }*/
 }

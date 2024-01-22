@@ -7,24 +7,28 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import java.io.Serializable;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.primefaces.event.FileUploadEvent;
 
-@Named(value = "contentController")
+@Named("contentController")
 @SessionScoped
+@Getter @Setter
 public class ContentController implements Serializable {
-    private byte[] uploadedContent;
+/*    private byte[] uploadedContent;
     private boolean showContent;
-    
+
     @Inject
     private BookListController bookListController;
 
-    public BookListController getBookListController() {
-        return bookListController;
-    }
+//    public BookListController getBookListController() {
+//        return bookListController;
+//    }
 
-    public void setBookListController(BookListController bookListController) {
+*//*    @Inject
+    public ContentController(BookListController bookListController) {
         this.bookListController = bookListController;
-    }
+    }*//*
 
     public void handleFileUpload(FileUploadEvent event) {
         uploadedContent = event.getFile().getContent();
@@ -54,13 +58,13 @@ public class ContentController implements Serializable {
         showContent = false;
     }
 
-    public boolean isShowContent() {
+*//*    public boolean isShowContent() {
         return showContent;
     }
 
     public byte[] getUploadedContent() {
         return uploadedContent;
-    }
+    }*/
 }
 
 
