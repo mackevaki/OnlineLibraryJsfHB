@@ -16,7 +16,7 @@
                         <p:panel id="imagePanel">
                             <p:graphicImage value="#{bookListController.selectedBook.image}"
                                             width="110" height="150" id="bookImage"
-                                            rendered="#{bookListController.editModeView}"/>
+                                            rendered="#{bookListController.editModeView}" cache="false"/>
                             <h:form enctype="multipart/form-data" id="formUploadImage" >
                                 <p:fileUpload id="imageUpload" label="#{msg.load}" listener="#{bookListController.uploadImage}"
                                               update="bookNewImage" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" multiple="false" auto="true"/>

@@ -19,14 +19,15 @@ import java.util.List;
 public class AuthorService extends CommonService<Author> implements DirServiceInterface<Author>, Serializable {
     @Override
     public List<Author> findByName(String str) {
-        Session session = getSession();
-        CriteriaBuilder cb = session.getCriteriaBuilder();
-        CriteriaQuery<Author> cq = cb.createQuery(Author.class);
-        Root<Author> from = cq.from(Author.class);
+        try (Session session = getSession()) {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Author> cq = cb.createQuery(Author.class);
+            Root<Author> from = cq.from(Author.class);
 
-        cq.select(from).where(cb.like(from.get(Author_.FIO), str+"%"));
+            cq.select(from).where(cb.like(from.get(Author_.FIO), str+"%"));
 
-        Query<Author> query = session.createQuery(cq);
-        return query.getResultList();
+            Query<Author> query = session.createQuery(cq);
+            return query.getResultList();
+        }
     }
 }

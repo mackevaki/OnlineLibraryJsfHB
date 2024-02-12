@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import java.io.Serializable;
 import java.util.Collection;
 import lombok.*;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.SelectBeforeUpdate;
 
 @Entity(name = "genre")
 @RequiredArgsConstructor
@@ -11,6 +14,9 @@ import lombok.*;
 @Setter
 @EqualsAndHashCode(of = "id")
 @ToString(of = "name")
+@DynamicUpdate // обновляет только те поля, которые изменились
+@DynamicInsert // вставляет только те поля, у которых есть значение
+@SelectBeforeUpdate // проверить объект перед обновлением, нужно ли его обновлять
 public class Genre implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id

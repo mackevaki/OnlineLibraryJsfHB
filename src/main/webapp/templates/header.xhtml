@@ -35,12 +35,12 @@
 
                     <input type="submit" class="button-text"></input>
 
-                    <h:inputText  id="search_string" styleClass="search-text" value="#{bookListController.searchString}"/>
+                    <h:inputText id="search_string" styleClass="search-text" value="#{bookSearchValues.searchText}"/>
 
-                    <p:commandButton id="btnSearch" value="#{msg.search}" styleClass="button" actionListener="#{bookListController.fillBooksBySearch}" update=":booksForm:booksList @form :lettersForm :genresForm :booksCount"/>
+                    <p:commandButton id="btnSearch" value="#{msg.search}" styleClass="button" actionListener="#{bookListController.updateBookList()}" />
 
                     <div class="dropdown">
-                        <h:selectOneMenu id="search_select" styleClass="select_search" value="#{bookListController.searchType}">
+                        <h:selectOneMenu id="search_select" styleClass="select_search" value="#{bookSearchValues.searchType}">
                             <f:selectItems value="${searchTypeController.searchList}" />
                         </h:selectOneMenu>
                     </div>
@@ -57,7 +57,7 @@
             <div class="letters">
                 <h:form id="lettersForm">
                     <ui:repeat value="#{bookListController.russianLetters}" var="letter">
-                        <p:commandLink value="#{letter}" styleClass="#{letter == bookListController.selectedLetter ? 'selected_letter' : ''}" actionListener="#{bookListController.fillBooksByLetter()}" update=":genresForm :booksForm:booksList @form :lettersForm   :booksCount">
+                        <p:commandLink value="#{letter}" styleClass="#{letter == bookSearchValues.letter ? 'selected_letter' : ''}" actionListener="#{bookListController.selectLetter()}">
                             <f:param name="letter" value="#{letter}" />
                         </p:commandLink>
                     </ui:repeat>

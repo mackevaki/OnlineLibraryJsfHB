@@ -15,33 +15,30 @@ import org.primefaces.event.FileUploadEvent;
 @SessionScoped
 @Getter @Setter
 public class ContentController implements Serializable {
-/*    private byte[] uploadedContent;
+    private byte[] uploadedContent;
     private boolean showContent;
 
+/*
+    private BookController bookController;
+
     @Inject
-    private BookListController bookListController;
-
-//    public BookListController getBookListController() {
-//        return bookListController;
-//    }
-
-*//*    @Inject
-    public ContentController(BookListController bookListController) {
-        this.bookListController = bookListController;
-    }*//*
+    public ContentController(BookController bookController) {
+        this.bookController = bookController;
+    }
+*/
 
     public void handleFileUpload(FileUploadEvent event) {
         uploadedContent = event.getFile().getContent();
         if (uploadedContent != null && uploadedContent.length > 0){
             showContent = true;
         }
-//        bookListController.getSelectedBook().setContent(uploadedContent);
+//        bookController.getSelectedBook().setContent(uploadedContent);
     }
 
     public ActionListener saveListener() {
         return (ActionEvent event) -> {
             if (uploadedContent != null) {
-                bookListController.getSelectedBook().setContent(uploadedContent);
+                // bookController.getSelectedBook().setContent(uploadedContent);
             }
             clear();
         };
@@ -58,13 +55,13 @@ public class ContentController implements Serializable {
         showContent = false;
     }
 
-*//*    public boolean isShowContent() {
+    public boolean isShowContent() {
         return showContent;
     }
 
     public byte[] getUploadedContent() {
         return uploadedContent;
-    }*/
+    }
 }
 
 

@@ -12,22 +12,22 @@
     </head>
     <h:body>
         <ui:composition template="/templates/library_template.xhtml">
-            <ui:define name="books_count">
+            <ui:define name="title">
+                #{msg.book_list}
+            </ui:define>
+
+            <ui:define name="admin_actions">
                 <div class="box-sh">
-                    <h1><p:outputLabel id="booksCount" value="#{msg.book_count} #{bookListController.pager.totalBooksCount}"/></h1>
+                    <h1><p:outputLabel id="booksCount" value="#{msg.book_count}: #{bookListController.pager.totalBooksCount}"/></h1>
 
                     <h:form id="add-action" rendered="#{request.isUserInRole('admin')}">
-                        <p:commandLink  actionListener="#{bookListController.switchAddMode}" update=":imagePanel :formEditBook :formUploadImage :formUploadPdf">
+                        <p:commandLink actionListener="#{bookListController.showAddDialog}" update="@([id$=dlgEditBook]) :imagePanel :formEditBook :formUploadImage :formUploadPdf">
                             <h:outputText value="#{msg.add_book}" title="#{msg.add_book}"/>
                         </p:commandLink>
                     </h:form>                
                 </div>            
             </ui:define>
-            
-            <ui:define name="title">
-                #{msg.book_list}
-            </ui:define>
-            
+
             <ui:define name="content">
 
                 <ui:include src="editBook.xhtml"/>
@@ -35,16 +35,17 @@
                 <h:form id="booksForm">
                    
                     <p:dataTable id="booksList" lazy="true" value="#{bookListController.bookLazyDataModel}" var="b" styleClass="books_list"  paginator="true" rows="5"
-                                 rowIndexVar="rowIndexVar" rowsPerPageTemplate="5,10,15" paginatorTemplate="{RowsPerPageDropdown} {PageLinks}" paginatorAlwaysVisible="false" emptyMessage="" >
+                                 rowIndexVar="rowIndexVar" rowsPerPageTemplate="5,10,15" paginatorTemplate="{CurrentPageReport} {RowsPerPageDropdown} {PageLinks}"
+                                 currentPageReportTemplate="#{msg.book_count}: {totalRecords}" paginatorAlwaysVisible="true" emptyMessage="#{msg.books_not_found}" >
                         <p:column styleClass="col1">
-                            <h:outputLink value="#{request.contextPath}/PdfContent?id=#{b.id}" target="_blank">
-                                <o:graphicImage cache="false" value="#{b.image}" dataURI="true" width="120"
-                                                height="160"/>
+                            <h:outputLink value="#{request.contextPath}/PdfContent" target="_blank">
+                                <o:graphicImage cache="false" value="#{b.image}" dataURI="true" width="120" height="160" rendered="#{not empty b.image}"/>
                                 <f:param name="id" value="#{b.id}"/>
+                                <f:param name="save" value="false"/>
+                                <f:param name="viewCount" value="#{b.viewCount}"/>
                             </h:outputLink>
 
                             <p:panelGrid id="ratingPanel" columns="1">
-
                                 <p:rating id="rating" value="#{b.avgRating}" styleClass="rating" cancel="false" stars="5">
                                     <p:ajax event="rate" listener="#{bookListController.rate}"
                                             onsuccess="alert('#{msg.thanks_rating}')"  />
@@ -61,37 +62,36 @@
                         <p:column styleClass="col2">
                             <div class="book_info">
                                 <p> 
-                                    <h:outputLink value="#{request.contextPath}/PdfContent" target="_blank" >
+                                    <h:outputLink id="bookName" value="#{request.contextPath}/PdfContent" target="_blank" >
                                         <h:outputText value="#{b.name}"/>
-                                        <f:param name="id" value="#{b.id}" />
+                                        <f:param name="id" value="#{b.id}"/>
+                                        <f:param name="save" value="false"/>
+                                        <f:param name="viewCount" value="#{b.viewCount}"/>
                                     </h:outputLink>
+
+                                    <p:tooltip for="bookName" value="#{b.descr}" showEffect="fade" hideEffect="fade" styleClass="tooltip"/>
                                 </p>
                                 <p>
-                                    <strong>#{msg.author_name}: </strong>
-                                    <h:outputText value="#{b.author.fio}" />
+                                    <strong>#{msg.author_name}: </strong><h:outputText value="#{b.author.fio}" />
                                 </p>
                                 <p>
-                                    <strong>#{msg.publisher} </strong>                                    
-                                    <h:outputText  value="#{b.publisher.name}" />
+                                    <strong>#{msg.publisher}: </strong><h:outputText  value="#{b.publisher.name}" />
                                 </p>
                                 <p>
-                                    <strong>#{msg.page_count}: </strong>
-                                    <h:outputText value="#{b.pageCount} #{msg.pages} " />
+                                    <strong>#{msg.page_count}: </strong><h:outputText value="#{b.pageCount} #{msg.pages} " />
                                 </p>
                                 <p>
-                                    <strong>#{msg.publish_year}</strong>
-                                    <h:outputText value="#{b.publishDate}" />
+                                    <strong>#{msg.publish_year}: </strong><h:outputText value="#{b.publishDate}" />
                                 </p>
                                 <p>
-                                    <strong>#{msg.isbn}</strong>
-                                    <h:outputText value="#{b.isbn}" />
+                                    <strong>#{msg.isbn}: </strong><h:outputText value="#{b.isbn}" />
                                 </p>
                             </div>
                         </p:column>
                         
                         <p:column styleClass="col3">
                             <div class="book_details">
-                                <p><strong>#{msg.descr}</strong></p>
+                                <p><strong>#{msg.descr}: </strong></p>
                                 <p>
                                     <h:outputText value="#{b.descr}" />
                                 </p>
@@ -123,11 +123,11 @@
 
                         </p:column>
                     </p:dataTable>
+
                     <p:confirmDialog widgetVar="dlgDeleteBook" header="#{msg.confirm}" message="#{msg.delete_confirm}?" width="300px" styleClass="dialog_delete">    
                         <h:panelGrid columns="2" style="margin:0 auto; width:150px;">
-                            <p:commandButton id="btnDeletedBook" value="#{msg.yes}" action="#{bookListController.deleteBook}" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" update=":formEditBook :booksForm:booksList :booksCount :growlMessage" onclick="PF('dlgDeleteBook').hide()"/>  
-                            <p:commandButton value="#{msg.no}" styleClass="ui-confirmdialog-no" icon="ui-icon-close" onclick="PF('dlgDeleteBook').hide()" type="button" immediate="true" global="false">
-                            </p:commandButton>
+                            <p:commandLink id="btnDeletedBook" value="#{msg.yes}" action="#{bookListController.delete}" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" update=":formEditBook :booksForm:booksList :booksCount :growlMessage" onclick="PF('dlgDeleteBook').hide()"/>
+                            <p:commandLink value="#{msg.no}" styleClass="ui-confirmdialog-no" icon="ui-icon-close" onclick="PF('dlgDeleteBook').hide()" type="button" immediate="true" global="false"/>
                         </h:panelGrid>
                     </p:confirmDialog>
                 </h:form>

@@ -10,15 +10,12 @@ import org.omnifaces.cdi.Eager;
 @SessionScoped
 @Eager
 public class LocaleChanger implements Serializable {
-    private Locale currentLocale; //= FacesContext.getCurrentInstance().getViewRoot().getLocale();
+    private Locale currentLocale = new Locale("ru"); // set russian language as default
     
     public LocaleChanger() {
     }
 
     public Locale getCurrentLocale() {
-        if (currentLocale == null) {
-            currentLocale = new Locale("ru");// set by default russian language
-        }        
         return currentLocale;
     }
     

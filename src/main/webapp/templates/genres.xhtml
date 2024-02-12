@@ -13,14 +13,14 @@
             <h4>#{msg.genres}</h4>
             <h:form id="genresForm" styleClass="genres">
                     <ui:repeat value="#{genreController.genreList}" var="g">
-                        <p:commandLink value="#{g.name}" styleClass="#{g.id == bookListController.selectedGenreId ? 'selected_link' : ''}" action="#{bookListController.fillBooksByGenre()}">
+                        <p:commandLink value="#{g.name}" styleClass="#{g.id == bookSearchValues.genreId ? 'selected_link' : ''}" action="#{bookListController.selectGenre()}">
                             <f:param name="genre_id" value="#{g.id}"/>
-                            <f:ajax onevent="showProgress" event="click" render=":booksForm:booksList @form :lettersForm :pages1 :pages2 :booksCount :genresForm" />
+<!--                            <f:ajax onevent="showProgress" event="click" render=":booksForm:booksList @form :lettersForm :booksCount :genresForm" />-->
                         </p:commandLink>
                     </ui:repeat>
-                    <p:commandLink value="#{msg.all_genres}" styleClass="#{bookListController.selectedGenreId == 0 ? 'selected_link' : ''}" action="#{bookListController.fillBooksByGenre()}">
+                    <p:commandLink value="#{msg.all_genres}" styleClass="#{bookSearchValues.genreId == 0 ? 'selected_link' : ''}" action="#{bookListController.selectGenre()}">
                         <f:param name="genre_id" value="0"/>
-                        <f:ajax onevent="showProgress" event="click" render=":booksForm:booksList @form :lettersForm :pages1 :pages2 :booksCount :genresForm" />
+<!--                        <f:ajax onevent="showProgress" event="click" render=":booksForm:booksList @form :lettersForm :booksCount :genresForm" />-->
                     </p:commandLink>
                 </h:form>
         </ui:composition>

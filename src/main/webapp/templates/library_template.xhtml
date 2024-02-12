@@ -7,71 +7,69 @@
       xmlns:p="http://primefaces.org/ui">
     
     <f:view locale="#{localeChanger.currentLocale}">
-    <h:head>
-        <title><ui:insert name="title"/></title>
-
-    </h:head>
-    <h:body>
+        <h:head>
+            <title><ui:insert name="title"/></title>
+        </h:head>
+        <h:body>
             <f:facet name="last">
                 <h:outputStylesheet library="css" name="lib_style.css" />
                 <h:outputScript library="js" name="library.js" target="head" />
-            </f:facet>        
-        <p:ajaxStatus id="ajaxStatusPanel">  
-                <f:facet name="start">      
-                    <div id="loading_wrapper">
-                        <p>#{msg.loading}...</p>
-                    </div>
-                </f:facet>  
+            </f:facet>
 
-                <f:facet name="complete">  
-                    <h:outputText value="" />  
-                </f:facet>  
-        </p:ajaxStatus>  
-        
-        <div class="container">
+            <p:ajaxStatus id="ajaxStatusPanel">
+                    <f:facet name="start">
+                        <div id="loading_wrapper">
+                            <p>#{msg.loading}...</p>
+                        </div>
+                    </f:facet>
+
+                    <f:facet name="complete">
+                        <h:outputText value="" />
+                    </f:facet>
+            </p:ajaxStatus>
+
             <div class="header">
                 <ui:insert name="header">
                     <ui:include src="/templates/header.xhtml"/>
-                </ui:insert>                 
+                </ui:insert>
             </div>
-            
-            <div class="middle">
-                <div class="left_menu">
-                    <ui:insert name="left_menu">
-                        <ui:include src="/templates/left_menu.xhtml"/>
-                    </ui:insert>                 
-                </div>
 
-                <div class="content">
-                    <p><strong><ui:insert name="books_count"/></strong></p>
+            <div class="container">
 
-                    <div>
-                        <ui:insert name="menu">
-                            <ui:include src="/pages/sendMail.xhtml" />
+                <div class="middle">
+                    <div class="left_menu">
+                        <ui:insert name="left_menu">
+                            <ui:include src="/templates/genres.xhtml"/>
                         </ui:insert>
                     </div>
 
-                    <div class="content_books">
-                        <ui:insert name="content">
-                            <ui:include src="/templates/content.xhtml"/>
-                        </ui:insert>    
+                    <div class="content">
+                        <p><strong><ui:insert name="admin_actions"/></strong></p>
+
+                        <div>
+                            <ui:insert name="menu">
+                                <ui:include src="/pages/sendMail.xhtml" />
+                            </ui:insert>
+                        </div>
+
+                        <div class="content_books">
+                            <ui:insert name="content">
+                                <ui:include src="/templates/content.xhtml"/>
+                            </ui:insert>
+                        </div>
+
                     </div>
-                    
-                    <div class="pager">
-                        <h:panelGroup id="pages2" layout="block"> <ui:insert name="paginator"/></h:panelGroup>
-                    </div>
+
+                    <div style="clear: both;">&nbsp;</div>
                 </div>
 
-                <div style="clear: both;">&nbsp;</div>
+                <div class="footer">
+                    <ui:insert name="footer">
+                        <ui:include src="/templates/footer.xhtml"/>
+                    </ui:insert>
+                </div>
             </div>
-            
-            <div class="footer">
-                <ui:insert name="footer">
-                    <ui:include src="/templates/footer.xhtml"/>
-                </ui:insert>                 
-            </div>
-        </div>
-    </h:body>
+        </h:body>
     </f:view>
 </html>
 

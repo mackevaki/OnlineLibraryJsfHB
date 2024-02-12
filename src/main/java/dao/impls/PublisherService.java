@@ -21,13 +21,15 @@ import java.util.List;
 public class PublisherService extends CommonService<Publisher> implements DirServiceInterface<Publisher>, Serializable {
     @Override
     public List<Publisher> findByName(String str) {
-        Session session = getSession();
-        CriteriaBuilder cb = session.getCriteriaBuilder();
-        CriteriaQuery<Publisher> cq = cb.createQuery(Publisher.class);
-        Root<Publisher> from = cq.from(Publisher.class);
+        try (Session session = getSession()) {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Publisher> cq = cb.createQuery(Publisher.class);
+            Root<Publisher> from = cq.from(Publisher.class);
 
-        cq.select(from).where(cb.like(from.get(Publisher_.NAME), str+"%"));
+            cq.select(from).where(cb.like(from.get(Publisher_.NAME), str+"%"));
 
-        Query<Publisher> query = session.createQuery(cq);
-        return query.getResultList();    }
+            Query<Publisher> query = session.createQuery(cq);
+            return query.getResultList();
+        }
+    }
 }

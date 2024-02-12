@@ -29,16 +29,23 @@ public class PdfContent extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("application/pdf");
         
-        try ( OutputStream out = response.getOutputStream()) {
+        try (OutputStream out = response.getOutputStream()) {
             long id = Long.parseLong(request.getParameter("id"));
+            long viewCount = Long.parseLong(request.getParameter("viewCount"));
+
             boolean save = Boolean.parseBoolean(request.getParameter("save"));
+
             String filename = request.getParameter("filename");
-            System.out.println("save=" + save);            
+
             byte[] content = bookService.getContent(id);
             response.setContentLength(content.length);
+
             if (save) {
                 response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(filename, "UTF-8") +".pdf");
             }
+
+            bookService.updateViewCount(viewCount + 1, id);
+
             out.write(content);
         } catch (Exception ex) {
             ex.printStackTrace();

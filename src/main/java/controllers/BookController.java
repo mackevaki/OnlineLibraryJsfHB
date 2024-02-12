@@ -38,12 +38,11 @@ import org.primefaces.shaded.commons.io.IOUtils;
 @SessionScoped
 @Eager
 @Getter @Setter
-public class BookListController implements Serializable {
+public class BookController implements Serializable {
     public static final String BOOKS_PAGE = "books";
     private ResourceBundle bundle;
     
     private Book selectedBook;
-    private long selectedAuthorId; // текущий автор книги из списка при редактировании книги
     private long selectedGenreId; // выбранный жанр
     private char selectedLetter; // выбранная буква алфавита
     
@@ -59,7 +58,7 @@ public class BookListController implements Serializable {
     private User user; // текущий пользователь после логина
     private FacesContext facesContext; // доступ к контейнеру JSF (контексту)
     private LazyDataModel<Book> bookLazyDataModel; // постраничный доступ к книгам
-    private BookSearchValues bookSearchValues; // данные для поика книг
+    private BookSearchValues bookSearchValues; // данные для поиска книг
    // сервисы доступа к БД
     private VoteService voteService;
 
@@ -69,7 +68,7 @@ public class BookListController implements Serializable {
     private String uploadedContentName; // сюда будет сохраняться имя файла для отображения на странице
     
     @Inject
-    public BookListController(BookService bookService, FacesContext facesContext, LazyDataModel<Book> bookLazyDataModel, BookSearchValues bookSearchValues, User user, VoteService voteService) {
+    public BookController(BookService bookService, FacesContext facesContext, LazyDataModel<Book> bookLazyDataModel, BookSearchValues bookSearchValues, User user, VoteService voteService) {
         this.bookService = bookService;
         this.facesContext = facesContext;
         this.bookLazyDataModel = bookLazyDataModel;
@@ -111,6 +110,20 @@ public class BookListController implements Serializable {
         return BOOKS_PAGE;
     }
 
+    // выбираем жанр и отображаем книги этого жанра
+    public void selectGenre() {
+        Map<String, String> params = facesContext.getExternalContext().getRequestParameterMap();
+        long genreId = Long.parseLong(params.get("genre_id"));
+
+        if (genreId != 0L) {
+            bookSearchValues.setGenreId(genreId);
+        } else {
+            bookSearchValues.setGenreId(0L);
+        }
+
+        updateBookList();     // обновить список книг и выделить выбранные жанр, букву
+    }
+
     // обновить список книг и выделить выбранные жанр, букву
     public void updateBookList() {
         // Обновляем область страницы booksList, которая автоматом вызывает получение новых данных из BookLazyDataModel.
@@ -135,6 +148,21 @@ public class BookListController implements Serializable {
         
         return BOOKS_PAGE;
     }
+
+
+    // нажимаем букву и отображаем книги, начинающие с этой буквы
+    public void selectLetter() {
+        Map<String, String> params = facesContext.getExternalContext().getRequestParameterMap();
+        char letter = params.get("letter").charAt(0);
+
+        if (bookSearchValues.getLetter() != null && bookSearchValues.getLetter() == letter) { // отжали букву (нажали второй раз на уже активную букву)
+            bookSearchValues.setLetter(null);
+        } else { // выбрали новую букву
+            bookSearchValues.setLetter(letter);
+        }
+
+        updateBookList(); // обновляем список книг
+    }
     
     public String fillBooksBySearch() {       
         cancelEdit();
@@ -154,6 +182,7 @@ public class BookListController implements Serializable {
         
         return BOOKS_PAGE;
     }
+
 //</editor-fold>
 
 //<editor-fold defaultstate="collapsed" desc="edition mode">
@@ -178,7 +207,7 @@ public class BookListController implements Serializable {
             facesContext.addMessage(null, new FacesMessage(bundle.getString("updated")));
         };
     }
-    public void deleteBook() {
+    public void delete() {
         bookService.delete(selectedBook);
         bookService.populateList();
 
@@ -189,9 +218,13 @@ public class BookListController implements Serializable {
         PrimeFaces.current().executeScript("PF('dlgEditBook').show()");
     }
     
-    public void switchAddMode() {
+    public void showAddDialog() {
         addModeView = true;
+
         selectedBook = new Book();
+        uploadedImage = loadDefaultIcon();
+        uploadedContent = loadDefaultPDF();
+        PrimeFaces.current().ajax().update("booksForm:booksList");
 
         PrimeFaces.current().executeScript("PF('dlgEditBook').show()");
     }
@@ -199,6 +232,8 @@ public class BookListController implements Serializable {
     public void cancelEdit() {
         editModeView = false;
         addModeView = false;
+
+        uploadedImage = null;
         PrimeFaces.current().executeScript("PF('dlgEditBook').hide()");
     }
 //</editor-fold>
@@ -215,68 +250,6 @@ public class BookListController implements Serializable {
         searchString = e.getNewValue().toString();
     }
     
-//<editor-fold defaultstate="collapsed" desc="getters and setters">
-/*    public boolean isEditModeView() {
-        return editModeView;
-    }
-    
-    public String getSearchString() {
-        return searchString;
-    }
-    
-    public void setSearchString(String searchString) {
-        this.searchString = searchString;
-    }
-    
-    public SearchType getSearchType() {
-        return searchType;
-    }
-    
-    public void setSearchType(SearchType searchType) {
-        this.searchType = searchType;
-    }
-        
-    public long getSelectedGenreId() {
-        return selectedGenreId;
-    }
-    
-    public void setSelectedGenreId(long selectedGenreId) {
-        this.selectedGenreId = selectedGenreId;
-    }
-    
-    public char getSelectedLetter() {
-        return selectedLetter;
-    }
-    
-    public void setSelectedLetter(char selectedLetter) {
-        this.selectedLetter = selectedLetter;
-    }
-
-    public Long getSelectedAuthorId() {
-        return selectedAuthorId;
-    }
-
-    public Pager<Book> getPager() {
-        return pager;
-    }
-    
-    public LazyDataModel<Book> getBookListModel() {
-        return bookListModel;
-    }
-
-    public Book getSelectedBook() {
-        return selectedBook;
-    }
-
-    public void setSelectedBook(Book selectedBook) {
-        this.selectedBook = selectedBook;
-    }
-            
-    public boolean isAddModeView() {
-        return addModeView;
-    }*/
-//</editor-fold>
-    
     private boolean validateFields() {
         if (isNullOrEmpty(selectedBook.getAuthor())
                 || isNullOrEmpty(selectedBook.getDescr())
@@ -292,7 +265,7 @@ public class BookListController implements Serializable {
 
         if (bookService.isIsbnExists(selectedBook.getIsbn(), selectedBook.getId())){
             failValidation(bundle.getString("error_isbn_exist"));
-            return false;            
+            return false;
         }
 
         if (addModeView) {
@@ -325,6 +298,7 @@ public class BookListController implements Serializable {
 
         String username = externalContext.getUserPrincipal().getName();
         int votedRating = Integer.parseInt(rateEvent.getRating().toString());
+        assert book != null;
         long voteCount = book.getTotalVoteCount() + 1;
         long rating = book.getTotalRating() + votedRating;
         int avgRating = calcAverageRating(rating, voteCount);
@@ -349,22 +323,25 @@ public class BookListController implements Serializable {
             return 0;
         }
 
-        int avgRating = Long.valueOf(totalRating / totalVoteCount).intValue();
-
-        return avgRating;
+        return (int) (totalRating / totalVoteCount);
     }
 
     private boolean isNullOrEmpty(Object obj) {
-//        if (obj instanceof Genre) {
-//            return ((Genre) obj).getName().trim().equals("");
-//        }
-//        if (obj instanceof Publisher) {
-//            return ((Publisher) obj).getName().trim().equals("");
-//        }
-//        if (obj instanceof Author) {
-//            return ((Author) obj).getFio().trim().equals("");
-//        }        
-        return obj == null || obj.toString().trim().equals("");
+        if (obj == null) {
+            return true;
+        }
+
+        if (obj instanceof Genre) {
+            return ((Genre) obj).getName().trim().isEmpty();
+        }
+        if (obj instanceof Publisher) {
+            return ((Publisher) obj).getName().trim().isEmpty();
+        }
+        if (obj instanceof Author) {
+            return ((Author) obj).getFio().trim().isEmpty();
+        }
+
+        return false;
     }
 
     private void failValidation(String message) {
@@ -374,6 +351,10 @@ public class BookListController implements Serializable {
 
     // сохранение/обновление книги
     public void save() {
+        if (!validateFields()) {
+            return;
+        }
+
         // если было выбрано новое изображение
         if (uploadedImage != null) {
             selectedBook.setImage(uploadedImage);
@@ -389,9 +370,16 @@ public class BookListController implements Serializable {
         }else{
             bookService.update(selectedBook); // сохраняем/обновляем все данные (кроме контента)
         }
+        // TODO
+        cancelEdit();
+//        bookService.populateList();
+
 
         // обновить области на странице
         PrimeFaces.current().executeScript("PF('dlgEditBook').hide()"); // скрыть диалоговое окно
+
+        facesContext.addMessage(null, new FacesMessage(bundle.getString("updated")));
+
         PrimeFaces.current().ajax().update("booksForm:booksList"); // обновить список книг
     }
 

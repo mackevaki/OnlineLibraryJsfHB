@@ -40,11 +40,11 @@
 
                     <h:form styleClass="login_form" id="login_form">
                             <p:panelGrid id="grid" columns="3" columnClasses="col1, col2, col3" styleClass="login_grid">
-                                        <span style="color:red;">*</span>#{msg.input_name}
+                                        <span style="color:red;">*</span>#{msg.input_name}:
                                         <p:inputText id="username" value="#{user.username}" required="true" requiredMessage="#{msg.login_required}"/>
                                         <p:message id="usernameReq" for="username" showDetail="true"   display="text"/>
 
-                                        <span style="color:red;">*</span>#{msg.input_pass}
+                                        <span style="color:red;">*</span>#{msg.input_pass}:
                                         <p:password id="password" value="#{user.password}" required="true" redisplay="true" requiredMessage="#{msg.password_required}"/>
                                         <p:message id="passwordReq" for="password" showDetail="true" display="text"/>
 

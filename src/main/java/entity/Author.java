@@ -11,6 +11,9 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.SelectBeforeUpdate;
 
 @Entity(name = "author")
 //@NoArgsConstructor
@@ -20,6 +23,9 @@ import lombok.ToString;
 @Getter
 @EqualsAndHashCode(of = "id")
 @ToString(of = "fio")
+@DynamicUpdate // обновляет только те поля, которые изменились
+@DynamicInsert // вставляет только те поля, у которых есть значение
+@SelectBeforeUpdate // проверить объект перед обновлением, нужно ли его обновлять
 public class Author implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id

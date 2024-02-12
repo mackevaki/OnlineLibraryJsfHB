@@ -6,6 +6,9 @@ import jakarta.faces.context.FacesContext;
 import jakarta.inject.Named;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serializable;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -13,6 +16,8 @@ import java.util.logging.Logger;
 
 @Named
 @SessionScoped
+@Getter @Setter
+// users data and trying login
 public class User implements Serializable {
     private String username;
     private String password;
@@ -25,11 +30,12 @@ public class User implements Serializable {
             Thread.sleep(1000); // imitation of loading
             
             HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
-            if (request.getSession(false) != null){
-                request.logout();
+
+            if (request.getUserPrincipal() == null || (request.getUserPrincipal() != null && !request.getUserPrincipal().getName().equals(username))) {
+                request.logout(); // если пользователь уже в активной сессии (авторизовался) - выходим
+                request.login(username, password); // запрос на аутентификацию/авторизацию
             }
 
-            request.login(username, password);
             return "/pages/books.xhtml?faces-redirect=true";
         } catch (ServletException ex) {
             ResourceBundle bundle = ResourceBundle.getBundle("nls.messages", FacesContext.getCurrentInstance().getViewRoot().getLocale());
@@ -40,9 +46,10 @@ public class User implements Serializable {
             context.addMessage("login_form", message);
         } catch (InterruptedException ex) {
             Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
+            Thread.currentThread().interrupt();
         }
         
-        return "index";
+        return "index"; // return to the main page if an error during authorization has occurred
     }
     
     public String logout() {
@@ -69,20 +76,5 @@ public class User implements Serializable {
      public String goBooks(){
         return "/pages/books.xhtml?faces-redirect=true";
     }    
-    
-    public String getUsername() {
-        return username;
-    }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 }

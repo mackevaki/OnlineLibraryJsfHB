@@ -27,13 +27,13 @@ public class ImageController implements Serializable {
     private byte[] uploadedImage;
     
     @Inject
-    private BookListController bookListController;
+    private BookController bookController;
     
     public ImageController() {
     }
 
     public StreamedContent getDefaultImage() {
-        return getStreamedContent(bookListController.getSelectedBook().getImage());
+        return getStreamedContent(bookController.getSelectedBook().getImage());
     }
 
     public StreamedContent getUploadedImage() {
@@ -42,7 +42,7 @@ public class ImageController implements Serializable {
 
     public void handleFileUpload(FileUploadEvent event) {
         uploadedImage = event.getFile().getContent();
-//        bookListController.getSelectedBook().setImage(uploadedImage);
+//        bookController.getSelectedBook().setImage(uploadedImage);
     }
     
     private DefaultStreamedContent getStreamedContent(byte[] image) {
@@ -61,7 +61,7 @@ public class ImageController implements Serializable {
     public ActionListener saveListener() {
         return (ActionEvent event) -> {
             if (uploadedImage != null) {
-                bookListController.getSelectedBook().setImage(uploadedImage);
+                bookController.getSelectedBook().setImage(uploadedImage);
             }
             clear();
         };

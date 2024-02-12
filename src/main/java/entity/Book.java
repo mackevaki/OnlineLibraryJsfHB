@@ -4,15 +4,23 @@ import jakarta.persistence.*;
 import java.io.Serializable;
 import java.util.Arrays;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.SelectBeforeUpdate;
 
 @Entity(name = "book")
 //@NoArgsConstructor
 //@AllArgsConstructor
 @RequiredArgsConstructor
 @Getter @Setter
+@DynamicUpdate // обновляет только те поля, которые изменились
+@DynamicInsert // вставляет только те поля, у которых есть значение
+@SelectBeforeUpdate // проверить объект перед обновлением, нужно ли его обновлять
+@EqualsAndHashCode(of = "id")
 public class Book implements Serializable{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
@@ -41,16 +49,16 @@ public class Book implements Serializable{
     private String descr;
     @Basic
     @Column(name = "avg_rating")
-    private Integer avgRating;
+    private Integer avgRating = 0;
     @Basic
     @Column(name = "total_vote_count")
-    private Long totalVoteCount;
+    private Long totalVoteCount = 0L;
     @Basic
     @Column(name = "total_rating")
-    private Long totalRating;
+    private Long totalRating = 0L;
     @Basic
     @Column(name = "view_count")
-    private Long viewCount;
+    private Long viewCount = 0L;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "genre_id", referencedColumnName = "id", nullable = false)
     private Genre genre;
@@ -61,36 +69,4 @@ public class Book implements Serializable{
     @JoinColumn(name = "publisher_id", referencedColumnName = "id", nullable = false)
     private Publisher publisher;
     private boolean edit;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Book book = (Book) o;
-
-        if (id != null ? !id.equals(book.id) : book.id != null) return false;
-        if (name != null ? !name.equals(book.name) : book.name != null) return false;
-        if (!Arrays.equals(content, book.content)) return false;
-        if (pageCount != null ? !pageCount.equals(book.pageCount) : book.pageCount != null) return false;
-        if (isbn != null ? !isbn.equals(book.isbn) : book.isbn != null) return false;
-        if (publishDate != null ? !publishDate.equals(book.publishDate) : book.publishDate != null) return false;
-        if (!Arrays.equals(image, book.image)) return false;
-        if (descr != null ? !descr.equals(book.descr) : book.descr != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = id != null ? id.hashCode() : 0;
-        result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + Arrays.hashCode(content);
-        result = 31 * result + (pageCount != null ? pageCount.hashCode() : 0);
-        result = 31 * result + (isbn != null ? isbn.hashCode() : 0);
-        result = 31 * result + (publishDate != null ? publishDate.hashCode() : 0);
-        result = 31 * result + Arrays.hashCode(image);
-        result = 31 * result + (descr != null ? descr.hashCode() : 0);
-        return result;
-    }
 }

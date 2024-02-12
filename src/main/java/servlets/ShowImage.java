@@ -1,6 +1,5 @@
 package servlets;
 
-import controllers.BookListController;
 import entity.Book;
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletException;
@@ -31,7 +30,7 @@ public class ShowImage extends HttpServlet {
         response.setContentType("image/jpeg");
         try (OutputStream out = response.getOutputStream()) {
             int index = Integer.valueOf(request.getParameter("index"));           
-            byte[] image = dataModel.getWrappedData().get(index).getImage();//((Book)bookListController.getPager().getList().get(index)).getImage();
+            byte[] image = dataModel.getWrappedData().get(index).getImage();//((Book)bookController.getPager().getList().get(index)).getImage();
             response.setContentLength(image.length);
             out.write(image);
         }        

@@ -36,7 +36,7 @@ public class AuthorController implements Serializable, Converter<Author> {
     @PostConstruct
     public void init() {
         authorMap = new HashMap<>();        
-        authorList = authorService.findAll(Author.class);//DataHelper.getInstance().getAllAuthors();
+        authorList = authorService.findAll(Author.class);
 
         authorList.sort(Comparator.comparing(Author::toString));
         
@@ -59,5 +59,4 @@ public class AuthorController implements Serializable, Converter<Author> {
     public List<Author> find(String fio) {
         return authorService.findByName(fio);
     }
-
 }
