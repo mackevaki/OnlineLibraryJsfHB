@@ -23,18 +23,18 @@ import org.primefaces.model.StreamedContent;
 @SessionScoped
 @Getter @Setter
 public class ImageController implements Serializable {
-/*    private final int IMAGE_MAX_SIZE = 204800;
+    private final int IMAGE_MAX_SIZE = 204800;
     private byte[] uploadedImage;
     
-    @Inject
-    private BookController bookController;
+/*    @Inject
+    private BookController bookController;*/
     
     public ImageController() {
     }
 
-    public StreamedContent getDefaultImage() {
+/*    public StreamedContent getDefaultImage() {
         return getStreamedContent(bookController.getSelectedBook().getImage());
-    }
+    }*/
 
     public StreamedContent getUploadedImage() {
         return getStreamedContent(uploadedImage);
@@ -61,7 +61,7 @@ public class ImageController implements Serializable {
     public ActionListener saveListener() {
         return (ActionEvent event) -> {
             if (uploadedImage != null) {
-                bookController.getSelectedBook().setImage(uploadedImage);
+//                bookController.getSelectedBook().setImage(uploadedImage);
             }
             clear();
         };
@@ -77,5 +77,5 @@ public class ImageController implements Serializable {
 
     public int getImageMaxSize() {
         return IMAGE_MAX_SIZE;
-    }*/
+    }
 }

@@ -21,6 +21,7 @@
             <div class="welcome">
                 <ui:include src="/templates/locales.xhtml"/>
                 <p><h5>#{msg.welcome},  #{user.username}</h5></p>
+
                 <h:form id="exit">                    
                     <h:commandLink action="#{user.logout()}" value="#{msg.exit}"/>
                 </h:form>
@@ -32,8 +33,7 @@
             
             <div class="search">
                 <h:form styleClass="search_form" id="search_form">
-
-                    <input type="submit" class="button-text"></input>
+                    <input type="submit" class="button-text"/>
 
                     <h:inputText id="search_string" styleClass="search-text" value="#{bookSearchValues.searchText}"/>
 
@@ -51,6 +51,7 @@
 
                     <p:defaultCommand target="btnSearch" />
                 </h:form>
+
                 <div class="clear"></div>
             </div>
             

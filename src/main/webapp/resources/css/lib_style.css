@@ -1,19 +1,19 @@
 .search { margin-top: 30px; position: relative;float: left;}
 .dropdown{
     float: right;
-    width:180px;
+    width: 180px;
 }
 .search .dropdown select{
     background: url("#{resource['images:select-button.png']}") no-repeat right #ffffff;
-    width: 150px;
+    width: 168px;
     padding: 8px;
     border:  1px solid #e2e2e2;
     border-radius: 5px;
     font-size: 14px;
     line-height: 1;
-    height: 30px;
+    height: 36px;
     -webkit-appearance: none;
-    margin-left:10px;
+    margin-left: 10px;
 }
 .search .ui-button{
     text-shadow: none;
@@ -22,20 +22,20 @@
 }
 .search .ui-button-text{
     text-align: center;
-    padding:0;
-    margin:0;
+    padding: 0;
+    margin: 0;
 }
 .search-text{
-    height:30px;
+    height: 36px;
 }
 .search input:focus {outline: none;}
-.search .button {float: right; width: 100px; height: 30px; border-radius: 3px; color: #fff; font-size: 14px; cursor: pointer; background: #e7685f; border: none; }
-.search-text { color: #838383; font-size: 14px; border-radius: 5px; border: 1px solid #e2e2e2; float: left; padding: 12px 0px 12px 38px; width: 674px;}
+.search .button {float: right; width: 100px; height: 36px; border-radius: 3px; color: #fff; font-size: 14px; cursor: pointer; background: #e7685f; border: none; }
+.search-text { color: #e4685d; font-size: 14px; border-radius: 5px; border: 1px solid #e2e2e2; float: left; padding: 12px 0px 12px 38px; width: 674px;}
 .search-text:focus {border: 1px solid #30b0e1; box-shadow: 0px 0px 5px 0px #abdfed;}
 .button-text { background:url("#{resource['images:submit.jpg']}") no-repeat; width: 18px; height: 18px; border: none; text-indent: -9999px; position: absolute; top: 7px; left: 7px; z-index: 100; cursor: pointer; }
 .clear { clear: both; }
 .search_type{
-    float:left;
+    float: left;
     width: 10%;
     text-align: right;
     margin-top: 5px;
@@ -45,7 +45,7 @@
 }
 .dropdown select, .selectBox {
     position: relative;
-    color: #000;
+    color: #880000;
     text-decoration: none;
     width: 164px;
     font-size: 14px;
@@ -112,9 +112,9 @@ body .ui-button.ui-button-text-only .ui-button-text {
     padding: 2px 15px;
 }
 body .ui-inputfield {
-    color: #495057;
+    color: #e4685d;
     background: #ffffff;
-    padding: 4px 10px;
+    /*padding: 4px 10px;*/
     border: 1px solid #ced4da;
     outline: 0 none;
     font-size: 12px;
@@ -175,7 +175,7 @@ body .ui-paginator .ui-paginator-current, body .ui-paginator .ui-paginator-rpp-o
     padding: 5px 5px 5px 15px;
     display: block; 
     text-decoration: none;
-    color: #8e3c40;
+    color: #007171;
 }
 a img { 
     border: none;
@@ -630,20 +630,21 @@ body .ui-button.ui-button-text-icon-left .ui-button-text {
 body .ui-panel .ui-panel-content {
     border: none;
     background: #ffffff;
-    color: #495057;
+    color: #880000;
     padding: 0rem;
     border-bottom-left-radius: 4px;
     border-bottom-right-radius: 4px;
-    /*height: 400px;*/
+    /*height: 660px;*/
 }
 body .ui-widget {
-    font-size: 12px;
+    font-size: 14px;
 }
 body .ui-panelgrid .ui-panelgrid-cell {
     border: 1px solid #dee2e6;
     background: #ffffff;
-    color: #495057;
+    color: #880000;
     padding: 5px;
+    height: 54px;
 }
 body .ui-dialog .ui-dialog-titlebar {
     background: #ffffff;
@@ -659,7 +660,7 @@ body .ui-panelgrid .ui-panelgrid-cell.ui-widget-header {
     border: 1px solid #dee2e6;
     background: #f8f9fa;
     color: #495057;
-    padding: 5px;
+    /*padding: 5px;*/
 }
 .vote-count{
     color:#009999;
@@ -674,4 +675,19 @@ body .ui-rating .ui-rating-star a {
     color: #007171;
     /*height: 10px;*/
     /*width: 9px;*/
+}
+body .ui-dialog .ui-dialog-content {
+    color: #e4685d;
+}
+body .ui-autocomplete-panel .ui-autocomplete-items .ui-autocomplete-item.ui-state-highlight {
+    background: #E3F2FD;
+    color: #e4685d;
+}
+body .ui-growl .ui-growl-item-container.ui-growl-info {
+    background: rgba(255, 216, 172, 0.83);
+    border: 1px solid rgba(222, 80, 63, 0.73);
+    color: #e4685d;
+}
+body .ui-growl .ui-growl-item-container.ui-growl-info .ui-growl-image {
+    color: #007171;
 }

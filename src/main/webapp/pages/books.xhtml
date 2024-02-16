@@ -18,8 +18,6 @@
 
             <ui:define name="admin_actions">
                 <div class="box-sh">
-                    <h1><p:outputLabel id="booksCount" value="#{msg.book_count}: #{bookListController.pager.totalBooksCount}"/></h1>
-
                     <h:form id="add-action" rendered="#{request.isUserInRole('admin')}">
                         <p:commandLink actionListener="#{bookListController.showAddDialog}" update="@([id$=dlgEditBook]) :imagePanel :formEditBook :formUploadImage :formUploadPdf">
                             <h:outputText value="#{msg.add_book}" title="#{msg.add_book}"/>
@@ -56,8 +54,7 @@
                             </p:panelGrid>
                         </p:column>
 
-                        <p:remoteCommand name="rate" actionListener="#{bookListController.rate}" global="false"
-                                         oncomplete="alert('#{msg.thanks_rating}')"/>
+                        <p:remoteCommand name="rate" actionListener="#{bookListController.rate}" global="false" oncomplete="alert('#{msg.thanks_rating}')"/>
 
                         <p:column styleClass="col2">
                             <div class="book_info">
@@ -71,30 +68,18 @@
 
                                     <p:tooltip for="bookName" value="#{b.descr}" showEffect="fade" hideEffect="fade" styleClass="tooltip"/>
                                 </p>
-                                <p>
-                                    <strong>#{msg.author_name}: </strong><h:outputText value="#{b.author.fio}" />
-                                </p>
-                                <p>
-                                    <strong>#{msg.publisher}: </strong><h:outputText  value="#{b.publisher.name}" />
-                                </p>
-                                <p>
-                                    <strong>#{msg.page_count}: </strong><h:outputText value="#{b.pageCount} #{msg.pages} " />
-                                </p>
-                                <p>
-                                    <strong>#{msg.publish_year}: </strong><h:outputText value="#{b.publishDate}" />
-                                </p>
-                                <p>
-                                    <strong>#{msg.isbn}: </strong><h:outputText value="#{b.isbn}" />
-                                </p>
+                                <p><strong>#{msg.author_name}: </strong><h:outputText value="#{b.author.fio}" /></p>
+                                <p><strong>#{msg.publisher}: </strong><h:outputText  value="#{b.publisher.name}" /></p>
+                                <p><strong>#{msg.page_count}: </strong><h:outputText value="#{b.pageCount} #{msg.pages} " /></p>
+                                <p><strong>#{msg.publish_year}: </strong><h:outputText value="#{b.publishDate}" /></p>
+                                <p><strong>#{msg.isbn}: </strong><h:outputText value="#{b.isbn}" /></p>
                             </div>
                         </p:column>
                         
                         <p:column styleClass="col3">
                             <div class="book_details">
                                 <p><strong>#{msg.descr}: </strong></p>
-                                <p>
-                                    <h:outputText value="#{b.descr}" />
-                                </p>
+                                <p><h:outputText value="#{b.descr}" /></p>
                             </div>
                         </p:column>
                         <p:column>
@@ -102,6 +87,7 @@
                                 <p class="read">#{msg.read}</p>
                                 <f:param name="id" value="#{b.id}"/>
                                 <f:param name="save" value="false"/>
+                                <f:param name="viewCount" value="#{b.viewCount}"/>
                             </h:outputLink>
 
                             <h:outputLink styleClass="mr" value="#{request.contextPath}/PdfContent" target="_blank"> 
@@ -109,14 +95,15 @@
                                 <f:param name="id" value="#{b.id}"/>
                                 <f:param name="filename" value="#{b.name}"/>
                                 <f:param name="save" value="true"/>
-                            </h:outputLink>  
+                                <f:param name="viewCount" value="#{b.viewCount}"/>
+                            </h:outputLink>
                             
                             <p:commandLink styleClass="mr" actionListener="#{bookListController.showEdit}" title="#{msg.edit_book}" update=":imagePanel :formEditBook :formUploadImage :formUploadPdf" rendered="#{request.isUserInRole('admin')}">
                                 <p class="edit">#{msg.edit}</p>
                                 <f:setPropertyActionListener value="#{b}" target="#{bookListController.selectedBook}" />  
                             </p:commandLink> 
 
-                            <p:commandLink styleClass="delete-button" title="#{msg.delete_book}" type="button" onclick="PF('dlgDeleteBook').show()" rendered="#{request.isUserInRole('admin')}" >
+                            <p:commandLink styleClass="delete-button" title="#{msg.delete_book}" type="button" action="#{bookListController.confirmDeleteBook}" rendered="#{request.isUserInRole('admin')}" >
                                 <p class="delete">#{msg.delete}</p>
                                 <f:setPropertyActionListener value="#{b}" target="#{bookListController.selectedBook}" /> 
                             </p:commandLink> 
@@ -126,7 +113,7 @@
 
                     <p:confirmDialog widgetVar="dlgDeleteBook" header="#{msg.confirm}" message="#{msg.delete_confirm}?" width="300px" styleClass="dialog_delete">    
                         <h:panelGrid columns="2" style="margin:0 auto; width:150px;">
-                            <p:commandLink id="btnDeletedBook" value="#{msg.yes}" action="#{bookListController.delete}" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" update=":formEditBook :booksForm:booksList :booksCount :growlMessage" onclick="PF('dlgDeleteBook').hide()"/>
+                            <p:commandLink id="btnDeletedBook" value="#{msg.yes}" action="#{bookListController.delete}" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" update=":formEditBook :booksForm:booksList :growlMessage" onclick="PF('dlgDeleteBook').hide()"/>
                             <p:commandLink value="#{msg.no}" styleClass="ui-confirmdialog-no" icon="ui-icon-close" onclick="PF('dlgDeleteBook').hide()" type="button" immediate="true" global="false"/>
                         </h:panelGrid>
                     </p:confirmDialog>

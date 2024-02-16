@@ -216,7 +216,7 @@ select,
 }
 
 .loaded .ui-fileupload-buttonbar{
-    background: url("/JsfLibrary_22_h/javax.faces.resource/load-pdf.png.xhtml?ln=images") repeat-x;
+    background: url("/javax.faces.resource/load-pdf.png.xhtml?ln=images") repeat-x;
     border-radius: 3px;
     border: 1px solid #e5e5e5;
     color: #616161;
@@ -296,7 +296,6 @@ select,
     background: url("#{resource['images:select.png']}")  0 0 no-repeat;
 }
 
-
 #booksForm .ui-confirm-dialog{
     background: #fff;
     width: 300px;
@@ -308,7 +307,7 @@ select,
 
 #booksForm .ui-dialog-titlebar{
     font-size: 16px;
-    color: #969c9d;
+    color: #007171;
     font-weight: bold;
     background: #ecf5f7;
     padding: 10px;
@@ -320,11 +319,11 @@ select,
 #booksForm .ui-dialog-content{
     padding: 10px;
     font-size: 15px;
-    
 }
 
 .ui-panelgrid .ui-panelgrid-cell {
     border: none;
 }
-
-
+body .ui-dialog.ui-confirm-dialog .ui-dialog-content > span {
+    padding: 10px;
+}

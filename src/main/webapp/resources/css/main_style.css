@@ -58,6 +58,7 @@ body {
     color: #009999;
     font-style: italic;
     font-size: 12px;
+    /*height: 100px;*/
 }
 .locales{
     width: 100%;

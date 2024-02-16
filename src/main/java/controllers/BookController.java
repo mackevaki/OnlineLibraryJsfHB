@@ -40,28 +40,31 @@ import org.primefaces.shaded.commons.io.IOUtils;
 @Getter @Setter
 public class BookController implements Serializable {
     public static final String BOOKS_PAGE = "books";
-    private ResourceBundle bundle;
-    
+
+    //<editor-fold defaultstate="collapsed" desc="fields for implementation using different methods for navigation sections">
     private Book selectedBook;
-    private long selectedGenreId; // выбранный жанр
-    private char selectedLetter; // выбранная буква алфавита
-    
+    private long selectedGenreId;
+    private char selectedLetter;
+
     private SearchType searchType = SearchType.TITLE;// хранит выбранный тип поиска
     private String searchString; // хранит поисковую строку
 
-    private final Pager<Book> pager = Pager.getInstance();
-    private final BookService bookService;
-
     private boolean editModeView; // отображение режима редактирования
     private boolean addModeView; // отображение режима добавления
-    
+
+    private final Pager<Book> pager = Pager.getInstance();
+    //</editor-fold>
+
     private User user; // текущий пользователь после логина
+
     private FacesContext facesContext; // доступ к контейнеру JSF (контексту)
     private LazyDataModel<Book> bookLazyDataModel; // постраничный доступ к книгам
     private BookSearchValues bookSearchValues; // данные для поиска книг
-   // сервисы доступа к БД
-    private VoteService voteService;
+    private ResourceBundle bundle;
 
+    // сервисы доступа к БД
+    private VoteService voteService;
+    private final BookService bookService;
 
     private byte[] uploadedImage; // сюда будет сохраняться загруженная пользователем новая обложка (при редактировании или при добавлении книги)
     private byte[] uploadedContent; // сюда будет сохраняться загруженный пользователем PDF контент (при редактировании или при добавлении книги)
@@ -92,7 +95,7 @@ public class BookController implements Serializable {
     }
 
     public String fillBooksByGenre() {
-        cancelEdit();
+//        cancelEdit();
         
         Map<String, String> params = facesContext.getExternalContext().getRequestParameterMap();
 
@@ -130,14 +133,13 @@ public class BookController implements Serializable {
         // При поиске книг BookLazyDataModel учитывает все поисковые данные (жанр, выбранная буквы и пр.) - и получит уже отфильтрованные данные
         PrimeFaces.current().ajax().update("booksForm:booksList");
 
-
         // обновляем остальные области, которые нужно обновить после поиска (области заново считают значения переменных)
         PrimeFaces.current().ajax().update("lettersForm");
         PrimeFaces.current().ajax().update("genresForm");
     }
 
     public String fillBooksByLetter() {
-        cancelEdit();
+//        cancelEdit();
         
         Map<String, String> params = facesContext.getExternalContext().getRequestParameterMap();
         selectedLetter = params.get("letter").charAt(0);
@@ -148,7 +150,6 @@ public class BookController implements Serializable {
         
         return BOOKS_PAGE;
     }
-
 
     // нажимаем букву и отображаем книги, начинающие с этой буквы
     public void selectLetter() {
@@ -165,7 +166,7 @@ public class BookController implements Serializable {
     }
     
     public String fillBooksBySearch() {       
-        cancelEdit();
+//        cancelEdit();
                 
         submitValues(' ', -1);
         
@@ -183,10 +184,8 @@ public class BookController implements Serializable {
         return BOOKS_PAGE;
     }
 
-//</editor-fold>
-
 //<editor-fold defaultstate="collapsed" desc="edition mode">
-    
+    /* old implementation */
     public ActionListener saveListener() {
         return (ActionEvent event) -> {
             if (!validateFields()) {
@@ -200,6 +199,7 @@ public class BookController implements Serializable {
             }
 
             cancelEdit();
+
             bookService.populateList();
 
             PrimeFaces.current().executeScript("PF('dlgEditBook').hide()");
@@ -207,25 +207,31 @@ public class BookController implements Serializable {
             facesContext.addMessage(null, new FacesMessage(bundle.getString("updated")));
         };
     }
+
     public void delete() {
         bookService.delete(selectedBook);
-        bookService.populateList();
 
         facesContext.addMessage(null, new FacesMessage(bundle.getString("deleted")));
-    }    
+
+        updateBookList();
+//        bookService.populateList();
+    }
+
     public void showEdit() {
         editModeView = true;
+
         PrimeFaces.current().executeScript("PF('dlgEditBook').show()");
     }
     
     public void showAddDialog() {
-        addModeView = true;
+//        addModeView = true;
 
         selectedBook = new Book();
+
         uploadedImage = loadDefaultIcon();
         uploadedContent = loadDefaultPDF();
-        PrimeFaces.current().ajax().update("booksForm:booksList");
 
+        PrimeFaces.current().ajax().update("booksForm:booksList");
         PrimeFaces.current().executeScript("PF('dlgEditBook').show()");
     }
      
@@ -234,20 +240,14 @@ public class BookController implements Serializable {
         addModeView = false;
 
         uploadedImage = null;
+        uploadedContent = null;
+
         PrimeFaces.current().executeScript("PF('dlgEditBook').hide()");
     }
 //</editor-fold>
 
     public Character[] getRussianLetters() {
         return new Character[]{'А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ё', 'Ж', 'З', 'И', 'Й', 'К', 'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У', 'Ф', 'Х', 'Ц', 'Ч', 'Ш', 'Щ', 'Ъ', 'Ы', 'Ь', 'Э', 'Ю', 'Я'};
-    }
-   
-    public void searchTypeChanged(ValueChangeEvent e) {
-        searchType = (SearchType) e.getNewValue();
-    }
-    
-    public void searchStringChanged(ValueChangeEvent e) {
-        searchString = e.getNewValue().toString();
     }
     
     private boolean validateFields() {
@@ -268,7 +268,7 @@ public class BookController implements Serializable {
             return false;
         }
 
-        if (addModeView) {
+/*        if (addModeView) {
             if (selectedBook.getContent() == null) {
                 failValidation(bundle.getString("error_load_pdf"));
                 return false;
@@ -278,9 +278,13 @@ public class BookController implements Serializable {
                 failValidation(bundle.getString("error_load_image"));
                 return false;
             }
-        }
+        }*/
 
         return true;
+    }
+    // подтверждение удаления книги
+    public void confirmDeleteBook() {
+        PrimeFaces.current().executeScript("PF('dlgDeleteBook').show()");
     }
 
     public void rate(RateEvent rateEvent) {
@@ -374,7 +378,6 @@ public class BookController implements Serializable {
         cancelEdit();
 //        bookService.populateList();
 
-
         // обновить области на странице
         PrimeFaces.current().executeScript("PF('dlgEditBook').hide()"); // скрыть диалоговое окно
 
@@ -406,13 +409,14 @@ public class BookController implements Serializable {
     }
 
     // при закрытии диалогового окна - очищать загруженный контент из переменной
-    public void onCloseDialog(CloseEvent event) {
+    public void onCloseDialog(ActionEvent event) {
         // обнулить все загруженные значения
         uploadedContent = null;
         uploadedImage = null;
         uploadedContentName = null;
-    }
 
+        PrimeFaces.current().executeScript("PF('dlgEditBook').hide()");
+    }
 
     // при загрузке обложки - она будет сохраняться в переменную uploadedImage
     public void uploadImage(FileUploadEvent event) {
