@@ -7,11 +7,13 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 
 @WebServlet(name = "PdfContent", urlPatterns = {"/PdfContent"})
+// servlet for displaying PDF in the browser
 public class PdfContent extends HttpServlet {
     @Inject
     private BookService bookService;
@@ -30,6 +32,7 @@ public class PdfContent extends HttpServlet {
         response.setContentType("application/pdf");
         
         try (OutputStream out = response.getOutputStream()) {
+            // servlet request parameters
             long id = Long.parseLong(request.getParameter("id"));
             long viewCount = Long.parseLong(request.getParameter("viewCount"));
 
@@ -37,13 +40,15 @@ public class PdfContent extends HttpServlet {
 
             String filename = request.getParameter("filename");
 
-            byte[] content = bookService.getContent(id);
+            byte[] content = bookService.getContent(id); // get book's content from DB (lazy fetched field)
             response.setContentLength(content.length);
 
+            // if the link to save the book is clicked, add headers to the response so that the browser shows the save dialog box
             if (save) {
                 response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(filename, "UTF-8") +".pdf");
             }
 
+            // increase the number of book views by 1
             bookService.updateViewCount(viewCount + 1, id);
 
             out.write(content);

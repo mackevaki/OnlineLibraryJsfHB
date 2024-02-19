@@ -35,7 +35,7 @@ public class PublisherController implements Serializable, Converter<Publisher> {
 
     @PostConstruct
     public void init() {
-        publisherList = publisherService.findAll(Publisher.class);//DataHelper.getInstance().getAllPublishers();
+        publisherList = publisherService.findAll(Publisher.class);
         publisherMap = new HashMap<>();
         
         publisherList.sort(Comparator.comparing(Publisher::toString));

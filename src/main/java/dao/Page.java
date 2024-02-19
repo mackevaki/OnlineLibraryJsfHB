@@ -10,8 +10,8 @@ import java.util.List;
 @Getter
 @Setter
 @AllArgsConstructor
-// Контейнер для хранения результата запроса с постраничностью
+// Container for storing the query result with pagination
 public class Page<T> implements Serializable {
-    private List<T> list; // найденные объекты
-    private int totalCount; // сколько всего найдено объектов
+    private List<T> list; // found objects
+    private int totalCount; // how many objects were found
 }

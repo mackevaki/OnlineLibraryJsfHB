@@ -2,7 +2,7 @@ package dao.interfaces;
 
 import java.util.List;
 
-// методы для таблиц-справочников (автор, жанр, издатель)
+// methods for reference tables (author, genre, publisher)
 public interface DirServiceInterface<T> extends CommonServiceInterface<T> {
-    List<T> findByName(String str); // ищет вхождение текста в названии
+    List<T> findByName(String str); // searches for occurrences of text in the title
 }

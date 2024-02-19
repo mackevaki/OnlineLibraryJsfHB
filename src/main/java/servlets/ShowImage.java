@@ -11,7 +11,6 @@ import org.primefaces.model.LazyDataModel;
 import java.io.IOException;
 import java.io.OutputStream;
 
-
 public class ShowImage extends HttpServlet {
     @Inject
     LazyDataModel<Book> dataModel;
@@ -25,18 +24,18 @@ public class ShowImage extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("image/jpeg");
         try (OutputStream out = response.getOutputStream()) {
-            int index = Integer.valueOf(request.getParameter("index"));           
-            byte[] image = dataModel.getWrappedData().get(index).getImage();//((Book)bookController.getPager().getList().get(index)).getImage();
+            int index = Integer.parseInt(request.getParameter("index"));
+            byte[] image = dataModel.getWrappedData().get(index).getImage();
+
             response.setContentLength(image.length);
             out.write(image);
         }        
     }
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods">
     /**
      * Handles the HTTP <code>GET</code> method.
      *
@@ -46,8 +45,7 @@ public class ShowImage extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         processRequest(request, response);
     }
 
@@ -60,8 +58,7 @@ public class ShowImage extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         processRequest(request, response);
     }
 

@@ -22,7 +22,7 @@ import java.util.List;
 @Named("bookService")
 @SessionScoped
 public class BookService extends CommonService<Book> implements BookServiceInterface<Book>, Serializable {
-    private Pager<Book> pager = Pager.getInstance();
+    private Pager<Book> pager = new Pager<>(); // for alternative implementation
     private final Page<Book> page = new Page<>(null, 0);
     private SavedCriteria<Book> currentDataCriteria;
     private SavedCriteria<Book> countCriteria;    
@@ -32,46 +32,84 @@ public class BookService extends CommonService<Book> implements BookServiceInter
         countCriteria = (selectionRoot, root, query, cb) -> query.select(cb.count(root));
     }
 
-    public void runCurrentCriteria() {
-        Session session = getSession();
-        if (!session.getTransaction().isActive()) {
-            session.beginTransaction();
+    @Override
+    public void update(Book book) {
+        try (Session session = getSessionFactory().openSession()) {
+            Transaction tx = session.beginTransaction();
+
+            if (book.getContent() == null) {
+                book.setContent(getContent(book.getId()));
+            }
+
+            session.merge(book);
+
+            tx.commit();
         }
+    }
 
-        CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
-        CriteriaQuery<Book> criteriaQuery = criteriaBuilder.createQuery(Book.class);
-        Root<Book> from = criteriaQuery.from(Book.class);
-        CriteriaQuery<Book> select;
+    @Override
+    public byte[] getContent(Long id) {
+        try (Session session = getSessionFactory().openSession();) {
+            return session.get(Book.class, id).getContent();
+        }
+    }
 
-        // какие поля возвращать из таблицы (исключаем content, чтобы не грузить БД. content получаем только по требованию, когда открывают книгу)
-        Selection<Book>[] selection = new Selection[]{from.get(Book_.ID).alias(Book_.ID),
-                from.get(Book_.NAME).alias(Book_.NAME),
-                from.get(Book_.IMAGE).alias(Book_.IMAGE),
-                from.get(Book_.GENRE).alias(Book_.GENRE),
-                from.get(Book_.PAGE_COUNT).alias(Book_.PAGE_COUNT),
-                from.get(Book_.ISBN).alias(Book_.ISBN),
-                from.get(Book_.PUBLISHER).alias(Book_.PUBLISHER),
-                from.get(Book_.AUTHOR).alias(Book_.AUTHOR),
-                from.get(Book_.PUBLISH_DATE).alias(Book_.PUBLISH_DATE),
-                from.get(Book_.DESCR).alias(Book_.DESCR),
-                from.get(Book_.AVG_RATING).alias(Book_.AVG_RATING),
-                from.get(Book_.TOTAL_VOTE_COUNT).alias(Book_.TOTAL_VOTE_COUNT),
-                from.get(Book_.TOTAL_RATING).alias(Book_.TOTAL_RATING),
-                from.get(Book_.VIEW_COUNT).alias(Book_.VIEW_COUNT)
-        };
-        
-        select = currentDataCriteria.getCriteriaQuery(criteriaBuilder.construct(Book.class, selection), from, criteriaQuery, criteriaBuilder).orderBy(criteriaBuilder.asc(from.get(Book_.NAME)));
-        
-        TypedQuery<Book> typedQuery = session.createQuery(select);
-        typedQuery.setFirstResult(pager.getFrom());
-        typedQuery.setMaxResults(pager.getTo());
-        
-        List<Book> list = typedQuery.getResultList();
-        
-        pager.setList(list);
-        
-        if (session.getTransaction().isActive()) {
-            session.getTransaction().commit();
+    @Override
+    public void updateViewCount(long viewCount, long bookId) {
+        try (Session session = getSessionFactory().openSession()) {
+            Transaction tx = session.beginTransaction();
+
+            CriteriaBuilder builder = session.getCriteriaBuilder();
+            CriteriaUpdate<Book> criteriaUpdate = builder.createCriteriaUpdate(Book.class);
+            Root<Book> root = criteriaUpdate.from(Book.class);
+
+            criteriaUpdate.set(root.get(Book_.VIEW_COUNT), viewCount)
+                    .where(builder.equal(root.get(Book_.ID), bookId));
+
+            session.createMutationQuery(criteriaUpdate).executeUpdate();
+
+            tx.commit();
+        }
+    }
+
+    public boolean isIsbnExists(String isbn, Long id) {
+        try (Session session = getSessionFactory().openSession()) {
+            Transaction tx = session.beginTransaction();
+
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+            Root<Book> root = cq.from(Book.class);
+
+            if (id == null || id == 0) {
+                cq.select(cb.count(root)).where(cb.equal(root.get("isbn"), isbn));
+            } else {
+                cq.select(cb.count(root)).where(cb.and(cb.equal(root.get("isbn"), isbn), cb.not(cb.equal(root.get("id"), id))));
+            }
+
+            Long result = session.createQuery(cq).getSingleResult();
+
+            tx.commit();
+
+            return result >= 1;
+        }
+    }
+
+    public void updateRating(Book book) {
+        try (Session session = getSessionFactory().openSession()) {
+            Transaction tx = session.beginTransaction();
+
+            CriteriaBuilder builder = session.getCriteriaBuilder();
+            CriteriaUpdate<Book> criteriaUpdate = builder.createCriteriaUpdate(Book.class);
+            Root<Book> root = criteriaUpdate.from(Book.class);
+
+            criteriaUpdate.set(root.get(Book_.TOTAL_VOTE_COUNT), book.getTotalVoteCount())
+                    .set(root.get(Book_.AVG_RATING), book.getAvgRating())
+                    .set(root.get(Book_.TOTAL_RATING), book.getTotalRating())
+                    .where(builder.equal(root.get(Book_.ID), book.getId()));
+
+            session.createMutationQuery(criteriaUpdate).executeUpdate();
+
+            tx.commit();
         }
     }
 
@@ -86,7 +124,7 @@ public class BookService extends CommonService<Book> implements BookServiceInter
         Root<Book> from = criteriaQuery.from(Book.class);
         CriteriaQuery<Book> select;
 
-        // какие поля возвращать из таблицы (исключаем content, чтобы не грузить БД. content получаем только по требованию, когда открывают книгу)
+        // specify which fields to return from the table (we exclude content so as not to load the database. Content is obtained only upon request when the book is opened)
         Selection<Book>[] selection = new Selection[]{from.get(Book_.ID).alias(Book_.ID),
                 from.get(Book_.NAME).alias(Book_.NAME),
                 from.get(Book_.IMAGE).alias(Book_.IMAGE),
@@ -118,7 +156,6 @@ public class BookService extends CommonService<Book> implements BookServiceInter
         List<Book> list = typedQuery.getResultList();
 
         page.setList(list);
-//        pager.setList(list);
 
         if (session.getTransaction().isActive()) {
             session.getTransaction().commit();
@@ -145,14 +182,6 @@ public class BookService extends CommonService<Book> implements BookServiceInter
             session.getTransaction().commit();
         }
     }
-    
-    public void findAll() {
-        currentDataCriteria = (selectionRoot, root, query, cb) -> query.select(selectionRoot);
-        countCriteria = (selectionRoot, root, query, cb) -> query.select(cb.count(root));
-        
-        runCountCriteria();
-        runCurrentCriteria();
-    }
 
     public void findAll(SortOrder sortOrder, String sortColumn, int startFrom, int pageSize) {
         currentDataCriteria = (selectionRoot, root, query, cb) -> query.select(selectionRoot);
@@ -160,38 +189,6 @@ public class BookService extends CommonService<Book> implements BookServiceInter
 
         runCountCriteria();
         runCurrentCriteria(sortOrder, sortColumn, startFrom, pageSize);
-    }
-
-    public void getBooksByGenre(Long genreId) {               
-        currentDataCriteria = (selectionRoot, root, query, cb) -> query.select(selectionRoot).where(cb.equal(root.get("genre").get("id"), genreId));
-        countCriteria = (selectionRoot, root, query, cb) -> query.select(cb.count(root)).where(cb.equal(root.get("genre").get("id"), genreId));
-
-        runCountCriteria();
-        runCurrentCriteria();
-    }
-
-    public void getBooksByLetter(Character letter) {
-        currentDataCriteria = (selectionRoot, root, query, cb) -> query.select(selectionRoot).where(cb.like(cb.lower(root.get("name")), letter.toString().toLowerCase() + "%"));
-        countCriteria = (selectionRoot, root, query, cb) -> query.select(cb.count(root)).where(cb.like(cb.lower(root.get("name")), letter.toString().toLowerCase() + "%"));
-
-        runCountCriteria();
-        runCurrentCriteria();
-    }
-
-    public void getBooksByAuthor(String authorName) {       
-        currentDataCriteria = (selectionRoot, root, query, cb) -> query.select(selectionRoot).where(cb.like(cb.lower(root.get("author").get("fio")), "%" + authorName.toLowerCase() + "%"));
-        countCriteria = (selectionRoot, root, query, cb) -> query.select(cb.count(root)).where(cb.like(cb.lower(root.get("author").get("fio")), "%" + authorName.toLowerCase() + "%"));
-
-        runCountCriteria();
-        runCurrentCriteria();
-    }
-
-    public void getBooksByName(String bookName) {        
-        currentDataCriteria = (selectionRoot, root, query, cb) -> query.select(selectionRoot).where(cb.like(cb.lower(root.get("name")), "%" + bookName.toLowerCase() + "%"));
-        countCriteria = (selectionRoot, queryRoot, query, cb) -> query.select(cb.count(queryRoot)).where(cb.like(cb.lower(queryRoot.get("name")), "%" + bookName.toLowerCase() + "%"));
-
-        runCountCriteria();
-        runCurrentCriteria();
     }
 
     public void getBooksByGenre(Long genreId, SortOrder sortOrder, String sortColumn, int startFrom, int pageSize) {
@@ -226,43 +223,6 @@ public class BookService extends CommonService<Book> implements BookServiceInter
         runCurrentCriteria(sortOrder, sortColumn, startFrom, pageSize);
     }
 
-    public boolean isIsbnExists(String isbn, Long id) {
-        try (Session session = getSessionFactory().openSession()) {
-            Transaction tx = session.beginTransaction();
-
-            CriteriaBuilder cb = session.getCriteriaBuilder();
-            CriteriaQuery<Long> cq = cb.createQuery(Long.class);
-            Root<Book> root = cq.from(Book.class);
-
-            if (id == null || id == 0) {
-                cq.select(cb.count(root)).where(cb.equal(root.get("isbn"), isbn));
-            } else {
-                cq.select(cb.count(root)).where(cb.and(cb.equal(root.get("isbn"), isbn), cb.not(cb.equal(root.get("id"), id))));
-            }
-
-            Long result = session.createQuery(cq).getSingleResult();
-            
-            tx.commit();
-
-            return result >= 1;
-        }
-    }
-
-    @Override
-    public void update(Book book) {
-        try (Session session = getSessionFactory().openSession()) {
-            Transaction tx = session.beginTransaction();
-            
-            if (book.getContent() == null) {
-                book.setContent(getContent(book.getId()));
-            } 
-            
-            session.merge(book);
-            
-            tx.commit();
-        }
-    }
-
     @Override
     public Page<Book> find(BookSearchValues bookSearchValues, int startFrom, int pageSize, String sortColumn, SortOrder sortOrder) {
         if (sortOrder == null) {
@@ -273,16 +233,20 @@ public class BookService extends CommonService<Book> implements BookServiceInter
             sortColumn = Book_.NAME;
         }
 
-        // если заполнены переменные поиска - использовать их
+        // if search variables are filled, use them
         if (bookSearchValues != null) {
-            // поиск по выбранному жанру
+            // search by selected genre
             if (bookSearchValues.getGenreId() != 0L) {
                 getBooksByGenre(bookSearchValues.getGenreId(), sortOrder, sortColumn, startFrom, pageSize);
+            // search by selected letter
             } else if (bookSearchValues.getLetter() != null && Character.isLetter(bookSearchValues.getLetter())) {
                 getBooksByLetter(bookSearchValues.getLetter(), sortOrder, sortColumn, startFrom, pageSize);
+            // search by text included in ...
             } else if (bookSearchValues.getSearchText() != null && !bookSearchValues.getSearchText().trim().isEmpty()) {
+                // ... author book's field
                 if (bookSearchValues.getSearchType() == SearchType.AUTHOR) {
                     getBooksByAuthor(bookSearchValues.getSearchText(), sortOrder, sortColumn, startFrom, pageSize);
+                // ... title book's field
                 } else if (bookSearchValues.getSearchType() == SearchType.TITLE) {
                     getBooksByName(bookSearchValues.getSearchText(), sortOrder, sortColumn, startFrom, pageSize);
                 }
@@ -294,54 +258,93 @@ public class BookService extends CommonService<Book> implements BookServiceInter
         return page;
     }
 
-    @Override
-    public byte[] getContent(Long id) {
-        try (Session session = getSessionFactory().openSession();) {
-            return session.get(Book.class, id).getContent();
+    /* old implementation using Pager with 'from' and 'to' fields w/o sorting*/
+    public void runCurrentCriteria() {
+        Session session = getSession();
+        if (!session.getTransaction().isActive()) {
+            session.beginTransaction();
+        }
+
+        CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
+        CriteriaQuery<Book> criteriaQuery = criteriaBuilder.createQuery(Book.class);
+        Root<Book> from = criteriaQuery.from(Book.class);
+        CriteriaQuery<Book> select;
+
+        // which fields to return from the table (we exclude content so as not to load the database. Content is obtained only upon request when the book is opened)
+        Selection<Book>[] selection = new Selection[]{from.get(Book_.ID).alias(Book_.ID),
+                from.get(Book_.NAME).alias(Book_.NAME),
+                from.get(Book_.IMAGE).alias(Book_.IMAGE),
+                from.get(Book_.GENRE).alias(Book_.GENRE),
+                from.get(Book_.PAGE_COUNT).alias(Book_.PAGE_COUNT),
+                from.get(Book_.ISBN).alias(Book_.ISBN),
+                from.get(Book_.PUBLISHER).alias(Book_.PUBLISHER),
+                from.get(Book_.AUTHOR).alias(Book_.AUTHOR),
+                from.get(Book_.PUBLISH_DATE).alias(Book_.PUBLISH_DATE),
+                from.get(Book_.DESCR).alias(Book_.DESCR),
+                from.get(Book_.AVG_RATING).alias(Book_.AVG_RATING),
+                from.get(Book_.TOTAL_VOTE_COUNT).alias(Book_.TOTAL_VOTE_COUNT),
+                from.get(Book_.TOTAL_RATING).alias(Book_.TOTAL_RATING),
+                from.get(Book_.VIEW_COUNT).alias(Book_.VIEW_COUNT)
+        };
+
+        select = currentDataCriteria.getCriteriaQuery(criteriaBuilder.construct(Book.class, selection), from, criteriaQuery, criteriaBuilder).orderBy(criteriaBuilder.asc(from.get(Book_.NAME)));
+
+        TypedQuery<Book> typedQuery = session.createQuery(select);
+        typedQuery.setFirstResult(pager.getFrom());
+        typedQuery.setMaxResults(pager.getTo());
+
+        List<Book> list = typedQuery.getResultList();
+
+        pager.setList(list);
+
+        if (session.getTransaction().isActive()) {
+            session.getTransaction().commit();
         }
     }
 
-    @Override
-    public void updateViewCount(long viewCount, long bookId) {
-        // обновляем таблицу book согласно новым данным рейтинга
-        try (Session session = getSessionFactory().openSession()) {
-            Transaction tx = session.beginTransaction();
+    public void getBooksByGenre(Long genreId) {
+        currentDataCriteria = (selectionRoot, root, query, cb) -> query.select(selectionRoot).where(cb.equal(root.get("genre").get("id"), genreId));
+        countCriteria = (selectionRoot, root, query, cb) -> query.select(cb.count(root)).where(cb.equal(root.get("genre").get("id"), genreId));
 
-            CriteriaBuilder builder = session.getCriteriaBuilder();
-            CriteriaUpdate<Book> criteriaUpdate = builder.createCriteriaUpdate(Book.class);
-            Root<Book> root = criteriaUpdate.from(Book.class);
+        runCountCriteria();
+        runCurrentCriteria();
+    }
 
-            criteriaUpdate.set(root.get(Book_.VIEW_COUNT), viewCount)
-                    .where(builder.equal(root.get(Book_.ID), bookId));
+    public void getBooksByLetter(Character letter) {
+        currentDataCriteria = (selectionRoot, root, query, cb) -> query.select(selectionRoot).where(cb.like(cb.lower(root.get("name")), letter.toString().toLowerCase() + "%"));
+        countCriteria = (selectionRoot, root, query, cb) -> query.select(cb.count(root)).where(cb.like(cb.lower(root.get("name")), letter.toString().toLowerCase() + "%"));
 
-            session.createMutationQuery(criteriaUpdate).executeUpdate();
+        runCountCriteria();
+        runCurrentCriteria();
+    }
 
-            tx.commit();
-        }
+    public void getBooksByAuthor(String authorName) {
+        currentDataCriteria = (selectionRoot, root, query, cb) -> query.select(selectionRoot).where(cb.like(cb.lower(root.get("author").get("fio")), "%" + authorName.toLowerCase() + "%"));
+        countCriteria = (selectionRoot, root, query, cb) -> query.select(cb.count(root)).where(cb.like(cb.lower(root.get("author").get("fio")), "%" + authorName.toLowerCase() + "%"));
+
+        runCountCriteria();
+        runCurrentCriteria();
+    }
+
+    public void getBooksByName(String bookName) {
+        currentDataCriteria = (selectionRoot, root, query, cb) -> query.select(selectionRoot).where(cb.like(cb.lower(root.get("name")), "%" + bookName.toLowerCase() + "%"));
+        countCriteria = (selectionRoot, queryRoot, query, cb) -> query.select(cb.count(queryRoot)).where(cb.like(cb.lower(queryRoot.get("name")), "%" + bookName.toLowerCase() + "%"));
+
+        runCountCriteria();
+        runCurrentCriteria();
+    }
+
+    public void findAll() {
+        currentDataCriteria = (selectionRoot, root, query, cb) -> query.select(selectionRoot);
+        countCriteria = (selectionRoot, root, query, cb) -> query.select(cb.count(root));
+
+        runCountCriteria();
+        runCurrentCriteria();
     }
 
     public void populateList() {
         runCountCriteria();
         runCurrentCriteria();
-    }
-
-    public void updateRating(Book book) {
-        try (Session session = getSessionFactory().openSession()) {
-            Transaction tx = session.beginTransaction();
-
-            CriteriaBuilder builder = session.getCriteriaBuilder();
-            CriteriaUpdate<Book> criteriaUpdate = builder.createCriteriaUpdate(Book.class);
-            Root<Book> root = criteriaUpdate.from(Book.class);
-
-            criteriaUpdate.set(root.get(Book_.TOTAL_VOTE_COUNT), book.getTotalVoteCount())
-                    .set(root.get(Book_.AVG_RATING), book.getAvgRating())
-                    .set(root.get(Book_.TOTAL_RATING), book.getTotalRating())
-                    .where(builder.equal(root.get(Book_.ID), book.getId()));
-
-            session.createMutationQuery(criteriaUpdate).executeUpdate();
-
-            tx.commit();
-        }
     }
 
     private void updateBookRate(Book book) {
@@ -353,11 +356,5 @@ public class BookService extends CommonService<Book> implements BookServiceInter
         query.setParameter("avgRating", book.getAvgRating());
 
         query.executeUpdate();
-    }
-
-    public byte[] getImage(Long id) {
-        try (Session session = getSessionFactory().openSession();) {
-            return session.get(Book.class, id).getImage();
-        }
     }
 }

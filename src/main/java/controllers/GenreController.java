@@ -41,8 +41,6 @@ public class GenreController implements Serializable, Converter<Genre> {
         genreList = genreService.findAll(Genre.class);
         
         genreList.sort(Comparator.comparing(Genre::toString));
-        
-//        genreList.add(0, createEmptyGenre());
 
         for (Genre genre : genreList) {
             genreMap.put(genre.getId(), genre);
@@ -63,11 +61,4 @@ public class GenreController implements Serializable, Converter<Genre> {
     public List<Genre> find(String name) {
         return genreService.findByName(name);
     }
-
-/*    private Genre createEmptyGenre() {
-        Genre genre = new Genre();
-        genre.setId(-1L);
-        genre.setName("");
-        return genre;
-    }*/
 }

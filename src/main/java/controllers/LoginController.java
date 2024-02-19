@@ -3,8 +3,6 @@ package controllers;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Named;
-import lombok.Getter;
-import lombok.Setter;
 
 @Named(value = "loginController")
 @RequestScoped

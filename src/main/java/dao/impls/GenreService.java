@@ -1,18 +1,14 @@
 package dao.impls;
 
 import dao.interfaces.DirServiceInterface;
-import entity.Author;
-import entity.Author_;
 import entity.Genre;
 import entity.Genre_;
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.inject.Named;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import org.hibernate.Session;
-import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
 
 import java.io.Serializable;

@@ -5,6 +5,7 @@ import jakarta.inject.Named;
 
 @Named
 @RequestScoped
+// old implementation using for p:datatable custom index variable
 public class RequestController {
     private int bookIndex = -1;
 

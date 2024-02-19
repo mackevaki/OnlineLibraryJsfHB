@@ -5,17 +5,23 @@ import beans.User;
 import dao.impls.VoteService;
 import db.BookService;
 import entity.*;
-import enums.SearchType;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.event.ActionEvent;
-import jakarta.faces.event.ActionListener;
-import jakarta.faces.event.ValueChangeEvent;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import lombok.Getter;
+import lombok.Setter;
+import models.BookSearchValues;
+import org.omnifaces.cdi.Eager;
+import org.primefaces.PrimeFaces;
+import org.primefaces.event.FileUploadEvent;
+import org.primefaces.event.RateEvent;
+import org.primefaces.model.LazyDataModel;
+import org.primefaces.shaded.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,233 +29,241 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-import lombok.Getter;
-import lombok.Setter;
-import models.BookSearchValues;
-import org.omnifaces.cdi.Eager;
-import org.primefaces.PrimeFaces;
-import org.primefaces.event.CloseEvent;
-import org.primefaces.event.FileUploadEvent;
-import org.primefaces.event.RateEvent;
-import org.primefaces.model.LazyDataModel;
-import org.primefaces.shaded.commons.io.IOUtils;
-
 @Named("bookListController")
 @SessionScoped
 @Eager
 @Getter @Setter
 public class BookController implements Serializable {
-    public static final String BOOKS_PAGE = "books";
+    private Book selectedBook; // selected book for editing/adding or other actions
 
-    //<editor-fold defaultstate="collapsed" desc="fields for implementation using different methods for navigation sections">
-    private Book selectedBook;
-    private long selectedGenreId;
-    private char selectedLetter;
+    private final Pager<Book> pager = new Pager<>();
 
-    private SearchType searchType = SearchType.TITLE;// хранит выбранный тип поиска
-    private String searchString; // хранит поисковую строку
+    private FacesContext facesContext; // access to the JSF container context
+    private LazyDataModel<Book> bookLazyDataModel; // page-by-page access to books
+    private BookSearchValues bookSearchValues; // data for searching books
+    private ResourceBundle bundle; // translations
 
-    private boolean editModeView; // отображение режима редактирования
-    private boolean addModeView; // отображение режима добавления
-
-    private final Pager<Book> pager = Pager.getInstance();
-    //</editor-fold>
-
-    private User user; // текущий пользователь после логина
-
-    private FacesContext facesContext; // доступ к контейнеру JSF (контексту)
-    private LazyDataModel<Book> bookLazyDataModel; // постраничный доступ к книгам
-    private BookSearchValues bookSearchValues; // данные для поиска книг
-    private ResourceBundle bundle;
-
-    // сервисы доступа к БД
+    // database access services
     private VoteService voteService;
     private final BookService bookService;
 
-    private byte[] uploadedImage; // сюда будет сохраняться загруженная пользователем новая обложка (при редактировании или при добавлении книги)
-    private byte[] uploadedContent; // сюда будет сохраняться загруженный пользователем PDF контент (при редактировании или при добавлении книги)
-    private String uploadedContentName; // сюда будет сохраняться имя файла для отображения на странице
-    
+    private byte[] uploadedImage; // a new cover uploaded by the user will be saved here (when editing or adding a book)
+    private byte[] uploadedContent; // PDF content uploaded by the user will be saved here (when editing or adding a book)
+    private String uploadedContentName; // the filename for display on the page will be saved here
+
+    private User user; // current user after login
+    private long selectedGenreId; // selected genre
+
     @Inject
     public BookController(BookService bookService, FacesContext facesContext, LazyDataModel<Book> bookLazyDataModel, BookSearchValues bookSearchValues, User user, VoteService voteService) {
         this.bookService = bookService;
+        this.voteService = voteService;
         this.facesContext = facesContext;
         this.bookLazyDataModel = bookLazyDataModel;
         this.bookSearchValues = bookSearchValues;
         this.user = user;
-        this.voteService = voteService;
     }
 
     @PostConstruct
     public void init() {
         bundle = ResourceBundle.getBundle("nls.messages", facesContext.getViewRoot().getLocale());       
     }
-    
-    private void submitValues(Character selectedLetter, long selectedGenreId) {
-        this.selectedLetter = selectedLetter;
-        this.selectedGenreId = selectedGenreId;
-    }
-    
-    private void fillBooksAll() {
-        bookService.findAll();
-    }
 
-    public String fillBooksByGenre() {
-//        cancelEdit();
-        
-        Map<String, String> params = facesContext.getExternalContext().getRequestParameterMap();
+    // called when voting for a book
+    public void rate(RateEvent rateEvent) {
+        ExternalContext externalContext = facesContext.getExternalContext();
 
-        int genreId = Integer.parseInt(params.get("genre_id"));
-        submitValues(' ', genreId);
+        Map<String, String> params = externalContext.getRequestParameterMap();
+        int bookId = Integer.parseInt(params.get("bookId"));
 
-        if (genreId == 0) {
-            bookService.findAll();
-        } else {
-            bookService.getBooksByGenre(selectedGenreId);
+        // look for the rated book in the lazyDataModel collection by id
+        Book book = null;
+        for(Book b : bookLazyDataModel.getWrappedData()) {
+            if(b.getId() == bookId) {
+                book = b;
+            }
         }
 
-        updateBookList();     // обновить список книг и выделить выбранные жанр, букву
+        int votedRating = Integer.parseInt(rateEvent.getRating().toString()); // vote score given by the user
 
-        return BOOKS_PAGE;
+        assert book != null;
+
+        long voteCount = book.getTotalVoteCount() + 1; // increase votes count
+        long rating = book.getTotalRating() + votedRating;
+        int avgRating = calcAverageRating(rating, voteCount); // get average rating
+
+        // fill the book's rating fields by calculated values
+        book.setTotalVoteCount(voteCount);
+        book.setAvgRating(avgRating);
+        book.setTotalRating(rating);
+
+        // create vote with user credentials, rating and rated book
+        Vote vote = new Vote();
+        vote.setBook(book);
+        vote.setUsername(user.getUsername());
+        vote.setValue(votedRating);
+
+        // persist the vote to DB
+        voteService.add(vote);
+
+        // update the book's rate in DB
+        bookService.updateRating(book);
+
+        facesContext.addMessage(null, new FacesMessage(bundle.getString("thanks_rating")));
+        PrimeFaces.current().ajax().update("growlMessage");
+
+        PrimeFaces.current().ajax().update("booksForm:booksList"); // update books list
     }
 
-    // выбираем жанр и отображаем книги этого жанра
+    private int calcAverageRating(long totalRating, long totalVoteCount) {
+        if (totalRating == 0 || totalVoteCount == 0) {
+            return 0;
+        }
+
+        return (int) (totalRating / totalVoteCount);
+    }
+
+    // Russian alphabet for display on the page
+    public Character[] getRussianLetters() {
+        return new Character[]{'А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ё', 'Ж', 'З', 'И', 'Й', 'К', 'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У', 'Ф', 'Х', 'Ц', 'Ч', 'Ш', 'Щ', 'Ъ', 'Ы', 'Ь', 'Э', 'Ю', 'Я'};
+    }
+
+    // click a genre and display books of this genre
     public void selectGenre() {
         Map<String, String> params = facesContext.getExternalContext().getRequestParameterMap();
         long genreId = Long.parseLong(params.get("genre_id"));
 
-        if (genreId != 0L) {
-            bookSearchValues.setGenreId(genreId);
-        } else {
-            bookSearchValues.setGenreId(0L);
-        }
+        bookSearchValues.setGenreId(genreId);
 
-        updateBookList();     // обновить список книг и выделить выбранные жанр, букву
+        updateBookList();
     }
 
-    // обновить список книг и выделить выбранные жанр, букву
-    public void updateBookList() {
-        // Обновляем область страницы booksList, которая автоматом вызывает получение новых данных из BookLazyDataModel.
-        // При поиске книг BookLazyDataModel учитывает все поисковые данные (жанр, выбранная буквы и пр.) - и получит уже отфильтрованные данные
-        PrimeFaces.current().ajax().update("booksForm:booksList");
-
-        // обновляем остальные области, которые нужно обновить после поиска (области заново считают значения переменных)
-        PrimeFaces.current().ajax().update("lettersForm");
-        PrimeFaces.current().ajax().update("genresForm");
-    }
-
-    public String fillBooksByLetter() {
-//        cancelEdit();
-        
-        Map<String, String> params = facesContext.getExternalContext().getRequestParameterMap();
-        selectedLetter = params.get("letter").charAt(0);
-        
-        submitValues(selectedLetter, -1);
- 
-        bookService.getBooksByLetter(selectedLetter);
-        
-        return BOOKS_PAGE;
-    }
-
-    // нажимаем букву и отображаем книги, начинающие с этой буквы
+    // click a letter and display books starting with that letter
     public void selectLetter() {
         Map<String, String> params = facesContext.getExternalContext().getRequestParameterMap();
         char letter = params.get("letter").charAt(0);
 
-        if (bookSearchValues.getLetter() != null && bookSearchValues.getLetter() == letter) { // отжали букву (нажали второй раз на уже активную букву)
+        if (bookSearchValues.getLetter() != null && bookSearchValues.getLetter() == letter) { // 2nd click on already selected letter
             bookSearchValues.setLetter(null);
-        } else { // выбрали новую букву
+        } else { // select new letter
             bookSearchValues.setLetter(letter);
         }
 
-        updateBookList(); // обновляем список книг
-    }
-    
-    public String fillBooksBySearch() {       
-//        cancelEdit();
-                
-        submitValues(' ', -1);
-        
-        if (searchString.trim().isEmpty()) {
-            fillBooksAll();
-            return BOOKS_PAGE;
-        }
-        
-        if (searchType == SearchType.AUTHOR) {
-            bookService.getBooksByAuthor(searchString);
-        } else if (searchType == SearchType.TITLE) {
-            bookService.getBooksByName(searchString);
-        }
-        
-        return BOOKS_PAGE;
+        updateBookList();
     }
 
-//<editor-fold defaultstate="collapsed" desc="edition mode">
-    /* old implementation */
-    public ActionListener saveListener() {
-        return (ActionEvent event) -> {
-            if (!validateFields()) {
-                return;
-            }           
-            
-            if (editModeView) {
-                bookService.update(selectedBook);
-            } else if(addModeView) {
-                bookService.add(selectedBook);
-            }
-
-            cancelEdit();
-
-            bookService.populateList();
-
-            PrimeFaces.current().executeScript("PF('dlgEditBook').hide()");
-
-            facesContext.addMessage(null, new FacesMessage(bundle.getString("updated")));
-        };
-    }
-
+    // delete selected book
     public void delete() {
         bookService.delete(selectedBook);
 
         facesContext.addMessage(null, new FacesMessage(bundle.getString("deleted")));
 
         updateBookList();
-//        bookService.populateList();
     }
 
-    public void showEdit() {
-        editModeView = true;
+    // save new book or update existing book
+    public void save() {
+        if (!validateFields()) {
+            return;
+        }
 
-        PrimeFaces.current().executeScript("PF('dlgEditBook').show()");
-    }
-    
-    public void showAddDialog() {
-//        addModeView = true;
+        if (uploadedImage != null) {
+            selectedBook.setImage(uploadedImage);
+        }
 
-        selectedBook = new Book();
+        if (uploadedContent != null) {
+            selectedBook.setContent(uploadedContent);
+        }
 
-        uploadedImage = loadDefaultIcon();
-        uploadedContent = loadDefaultPDF();
+        if (selectedBook.getId() == null || selectedBook.getId() == 0) {
+            bookService.add(selectedBook);
+        }else{
+            bookService.update(selectedBook);
+        }
+
+        PrimeFaces.current().executeScript("PF('dlgEditBook').hide()");
+
+        facesContext.addMessage(null, new FacesMessage(bundle.getString("updated")));
 
         PrimeFaces.current().ajax().update("booksForm:booksList");
-        PrimeFaces.current().executeScript("PF('dlgEditBook').show()");
     }
-     
-    public void cancelEdit() {
-        editModeView = false;
-        addModeView = false;
 
-        uploadedImage = null;
+    private byte[] loadDefaultIcon() {
+        InputStream stream = facesContext.getExternalContext().getResourceAsStream("/resources/images/no-cover.jpg");
+        try {
+            return IOUtils.toByteArray(stream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private byte[] loadDefaultPDF() {
+        InputStream stream = facesContext.getExternalContext().getResourceAsStream("/resources/default-content.pdf");
+        try {
+            return IOUtils.toByteArray(stream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // clear the loaded content from the variable after closing the dialog
+    public void onCloseDialog(ActionEvent event) {
         uploadedContent = null;
+        uploadedImage = null;
+        uploadedContentName = null;
 
         PrimeFaces.current().executeScript("PF('dlgEditBook').hide()");
     }
-//</editor-fold>
 
-    public Character[] getRussianLetters() {
-        return new Character[]{'А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ё', 'Ж', 'З', 'И', 'Й', 'К', 'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У', 'Ф', 'Х', 'Ц', 'Ч', 'Ш', 'Щ', 'Ъ', 'Ы', 'Ь', 'Э', 'Ю', 'Я'};
+    public void uploadImage(FileUploadEvent event) {
+        if (event.getFile() != null) {
+            uploadedImage = event.getFile().getContent();
+        }
     }
-    
+
+    public void uploadContent(FileUploadEvent event) {
+        if (event.getFile() != null) {
+            uploadedContent = event.getFile().getContent();
+
+            // uploaded pdf name to display to the user after downloading
+            uploadedContentName = event.getFile().getFileName();
+            if (uploadedContentName.length() > 20) {
+                uploadedContentName = uploadedContentName.substring(20).concat("...");
+            }
+        }
+    }
+
+    // update the list of books and highlight the selected genre, letter
+    public void updateBookList() {
+        // update the booksList page area to cause new data to be received from the BookLazyDataModel
+        // when searching for books, BookLazyDataModel takes into account all search data (genre, selected letters etc.) - and will receive already filtered data
+        PrimeFaces.current().ajax().update("booksForm:booksList");
+
+        // update the remaining areas that need to be updated after the search to re-calculate the values of the variables
+        PrimeFaces.current().ajax().update("lettersForm");
+        PrimeFaces.current().ajax().update("genresForm");
+    }
+
+    public void confirmDeleteBook() {
+        PrimeFaces.current().executeScript("PF('dlgDeleteBook').show()");
+    }
+
+    public void showEditDialog() {
+        PrimeFaces.current().executeScript("PF('dlgEditBook').show()");
+    }
+
+    public void showAddDialog() {
+        selectedBook = new Book();
+        uploadedImage = loadDefaultIcon();
+        uploadedContent = loadDefaultPDF();
+
+//        PrimeFaces.current().ajax().update("booksForm:booksList");
+        PrimeFaces.current().executeScript("PF('dlgEditBook').show()");
+    }
+
+    // checking book fields for emptiness
     private boolean validateFields() {
         if (isNullOrEmpty(selectedBook.getAuthor())
                 || isNullOrEmpty(selectedBook.getDescr())
@@ -268,67 +282,9 @@ public class BookController implements Serializable {
             return false;
         }
 
-/*        if (addModeView) {
-            if (selectedBook.getContent() == null) {
-                failValidation(bundle.getString("error_load_pdf"));
-                return false;
-            }
-
-            if (selectedBook.getImage() == null) {
-                failValidation(bundle.getString("error_load_image"));
-                return false;
-            }
-        }*/
-
         return true;
     }
-    // подтверждение удаления книги
-    public void confirmDeleteBook() {
-        PrimeFaces.current().executeScript("PF('dlgDeleteBook').show()");
-    }
 
-    public void rate(RateEvent rateEvent) {
-        ExternalContext externalContext = facesContext.getExternalContext();
-
-        Map<String, String> params = externalContext.getRequestParameterMap();
-        int bookId = Integer.parseInt(params.get("bookId"));
-
-        Book book = null;
-        for(Book b : bookLazyDataModel.getWrappedData()) {
-            if(b.getId() == bookId) {
-                book = b;
-            }
-        }
-
-        String username = externalContext.getUserPrincipal().getName();
-        int votedRating = Integer.parseInt(rateEvent.getRating().toString());
-        assert book != null;
-        long voteCount = book.getTotalVoteCount() + 1;
-        long rating = book.getTotalRating() + votedRating;
-        int avgRating = calcAverageRating(rating, voteCount);
-
-        book.setTotalVoteCount(voteCount);
-        book.setAvgRating(avgRating);
-        book.setTotalRating(rating);
-
-        Vote vote = new Vote();
-        vote.setBook(book);
-        vote.setUsername(username);
-        vote.setValue(votedRating);
-
-        voteService.add(vote);
-        bookService.updateRating(book);
-
-        PrimeFaces.current().ajax().update("booksForm:booksList"); // обновляем список книг
-    }
-
-    private int calcAverageRating(long totalRating, long totalVoteCount) {
-        if (totalRating == 0 || totalVoteCount == 0) {
-            return 0;
-        }
-
-        return (int) (totalRating / totalVoteCount);
-    }
 
     private boolean isNullOrEmpty(Object obj) {
         if (obj == null) {
@@ -351,90 +307,5 @@ public class BookController implements Serializable {
     private void failValidation(String message) {
         facesContext.validationFailed();
         facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, message, bundle.getString("error")));
-    }
-
-    // сохранение/обновление книги
-    public void save() {
-        if (!validateFields()) {
-            return;
-        }
-
-        // если было выбрано новое изображение
-        if (uploadedImage != null) {
-            selectedBook.setImage(uploadedImage);
-        }
-
-        // если был выбран новый PDF контент
-        if (uploadedContent != null) {
-            selectedBook.setContent(uploadedContent); // content нужно сохранять отдельно, т.к. изначально это поле не заполняется в book
-        }
-
-        if (selectedBook.getId() == null || selectedBook.getId() == 0) {
-            bookService.add(selectedBook); // сохраняем/обновляем все данные (кроме контента)
-        }else{
-            bookService.update(selectedBook); // сохраняем/обновляем все данные (кроме контента)
-        }
-        // TODO
-        cancelEdit();
-//        bookService.populateList();
-
-        // обновить области на странице
-        PrimeFaces.current().executeScript("PF('dlgEditBook').hide()"); // скрыть диалоговое окно
-
-        facesContext.addMessage(null, new FacesMessage(bundle.getString("updated")));
-
-        PrimeFaces.current().ajax().update("booksForm:booksList"); // обновить список книг
-    }
-
-    // загрузить картинку для обложки по-умолчанию
-    private byte[] loadDefaultIcon() {
-        InputStream stream = facesContext.getExternalContext().getResourceAsStream("/resources/images/no-cover.jpg");
-        try {
-            return IOUtils.toByteArray(stream);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    // загрузить PDF для книги по-умолчанию
-    private byte[] loadDefaultPDF() {
-        InputStream stream = facesContext.getExternalContext().getResourceAsStream("/resources/default-content.pdf");
-        try {
-            return IOUtils.toByteArray(stream);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    // при закрытии диалогового окна - очищать загруженный контент из переменной
-    public void onCloseDialog(ActionEvent event) {
-        // обнулить все загруженные значения
-        uploadedContent = null;
-        uploadedImage = null;
-        uploadedContentName = null;
-
-        PrimeFaces.current().executeScript("PF('dlgEditBook').hide()");
-    }
-
-    // при загрузке обложки - она будет сохраняться в переменную uploadedImage
-    public void uploadImage(FileUploadEvent event) {
-        if (event.getFile() != null) {
-            uploadedImage = event.getFile().getContent();
-        }
-    }
-
-    // при загрузке PDF контента - он будет сохраняться в переменную uploadedContent
-    public void uploadContent(FileUploadEvent event) {
-        if (event.getFile() != null) {
-            uploadedContent = event.getFile().getContent();
-
-            // название книги для отображения пользователю после загрузки
-            uploadedContentName = event.getFile().getFileName();
-            if (uploadedContentName.length() > 20) {
-                uploadedContentName = uploadedContentName.substring(20).concat("...");
-            }
-        }
     }
 }

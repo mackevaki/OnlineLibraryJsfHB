@@ -1,11 +1,11 @@
 package controllers;
 
-import java.util.ResourceBundle;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 
-public class SessionUtils {
+import java.util.ResourceBundle;
 
+public class SessionUtils {
     public static SessionUtils sessionObjects;
 
     public static SessionUtils getInstance() {

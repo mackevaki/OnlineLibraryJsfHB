@@ -17,7 +17,7 @@ import java.util.logging.Logger;
 @Named
 @SessionScoped
 @Getter @Setter
-// users data and trying login
+// users data and trying to log in
 public class User implements Serializable {
     private String username;
     private String password;
@@ -32,12 +32,13 @@ public class User implements Serializable {
             HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
 
             if (request.getUserPrincipal() == null || (request.getUserPrincipal() != null && !request.getUserPrincipal().getName().equals(username))) {
-                request.logout(); // если пользователь уже в активной сессии (авторизовался) - выходим
-                request.login(username, password); // запрос на аутентификацию/авторизацию
+                request.logout(); // if user already has active session (has authorized) - log out
+                request.login(username, password); // authentication/authorization request
             }
 
-            return "/pages/books.xhtml?faces-redirect=true";
+            return "/pages/books.xhtml?faces-redirect=true"; // if user has logged in successfully, go to the page with books
         } catch (ServletException ex) {
+            // if something went wrong
             ResourceBundle bundle = ResourceBundle.getBundle("nls.messages", FacesContext.getCurrentInstance().getViewRoot().getLocale());
             Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
             FacesContext context = FacesContext.getCurrentInstance();
@@ -53,20 +54,20 @@ public class User implements Serializable {
     }
     
     public String logout() {
-        String result = "/index.xhtml?faces-redirect=true";
+        String indexRedirect = "/index.xhtml?faces-redirect=true";
 
         FacesContext context = FacesContext.getCurrentInstance();
         HttpServletRequest request = (HttpServletRequest) context.getExternalContext().getRequest();
 
         try {
-            request.logout();
+            request.logout(); // application exit (all roles will be reset)
         } catch (ServletException e) {
             Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, e);
         }
 
         FacesContext.getCurrentInstance().getExternalContext().invalidateSession();
 
-        return result;
+        return indexRedirect;
     }
         
     public String goHome(){

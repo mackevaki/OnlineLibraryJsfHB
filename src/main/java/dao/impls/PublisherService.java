@@ -1,8 +1,6 @@
 package dao.impls;
 
 import dao.interfaces.DirServiceInterface;
-import entity.Author;
-import entity.Author_;
 import entity.Publisher;
 import entity.Publisher_;
 import jakarta.enterprise.context.SessionScoped;

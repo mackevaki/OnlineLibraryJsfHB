@@ -1,14 +1,8 @@
 package models;
 
-import beans.Pager;
 import dao.Page;
 import db.BookService;
 import entity.Book;
-
-import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
-
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -17,15 +11,17 @@ import org.primefaces.model.LazyDataModel;
 import org.primefaces.model.SortMeta;
 import org.primefaces.model.SortOrder;
 
-// модель для постраничного вывода списка значений
-// можно применять не только к книгам, но и к любым типам данных
+import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
+
+// model for page-by-page display of a list of values
 @Named
 @SessionScoped
 public class BookListDataModel extends LazyDataModel<Book>  implements Serializable {
     private List<Book> bookList;
-    private final BookService bookService; //= DataHelper.getInstance();
-    private Pager pager = Pager.getInstance();
-    private BookSearchValues bookSearchValues; // параметры поиска
+    private final BookService bookService;
+    private BookSearchValues bookSearchValues; // search attributes
 
     @Inject
     public BookListDataModel(BookService bookService, BookSearchValues bookSearchValues) {
@@ -35,7 +31,7 @@ public class BookListDataModel extends LazyDataModel<Book>  implements Serializa
 
     @Override
     public int count(Map<String, FilterMeta> filterBy) {
-        return 0;//(int) bookList.stream().count();
+        return 0;
     }
 
     @Override
@@ -55,14 +51,6 @@ public class BookListDataModel extends LazyDataModel<Book>  implements Serializa
     
     @Override
     public List<Book> load(int first, int pageSize, Map<String, SortMeta> sortBy, Map<String, FilterMeta> filterBy) {
-/*        pager.setFrom(first);
-        pager.setTo(pageSize);
-        
-        bookService.populateList();
-
-        this.setRowCount(pager.getTotalBooksCount());
-        
-        bookList = pager.getList(); // alternative pagination implementation technique (uses Pager) */
         Page<Book> page = bookService.find(bookSearchValues, first, pageSize, "name", SortOrder.ASCENDING);
         this.setRowCount(page.getTotalCount());
 

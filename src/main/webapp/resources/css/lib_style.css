@@ -412,7 +412,7 @@ body {
     /* height: 450px; */
     font-size: 12px;
     float: left;
-    margin: 15px;
+    margin: -15px 15px 15px;
 }
 .book_info a{
     /*text-decoration: none;*/

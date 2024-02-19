@@ -4,12 +4,12 @@ import dao.Page;
 import models.BookSearchValues;
 import org.primefaces.model.SortOrder;
 
-// методы для работы с книгами
+// methods for working with books
 public interface BookServiceInterface<T> extends CommonServiceInterface<T>{
-    // поиск книг с постраничным выводом
+    // search for books with page output
     Page<T> find(BookSearchValues bookSearchValues, int startFrom, int pageSize, String sortColumn, SortOrder sortOrder);
 
-    byte[] getContent(Long id); // получить контент (PDF) книги
+    byte[] getContent(Long id); // get book's content (PDF)
 
-    void updateViewCount(long viewCount, long bookId); // обновить кол-во просмотров
+    void updateViewCount(long viewCount, long bookId); // update number of views
 }

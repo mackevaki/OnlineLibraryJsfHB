@@ -45,16 +45,13 @@
 
                             <p:panelGrid id="ratingPanel" columns="1">
                                 <p:rating id="rating" value="#{b.avgRating}" styleClass="rating" cancel="false" stars="5">
-                                    <p:ajax event="rate" listener="#{bookListController.rate}"
-                                            onsuccess="alert('#{msg.thanks_rating}')"  />
+                                    <p:ajax event="rate" listener="#{bookListController.rate}" />
                                     <f:param name="bookId" value="#{b.id}"/>
                                 </p:rating>
 
                                 <p:outputLabel id="voteCount" value="#{msg.vote_count}: #{b.totalVoteCount}" styleClass="vote-count"/>
                             </p:panelGrid>
                         </p:column>
-
-                        <p:remoteCommand name="rate" actionListener="#{bookListController.rate}" global="false" oncomplete="alert('#{msg.thanks_rating}')"/>
 
                         <p:column styleClass="col2">
                             <div class="book_info">
@@ -98,7 +95,7 @@
                                 <f:param name="viewCount" value="#{b.viewCount}"/>
                             </h:outputLink>
                             
-                            <p:commandLink styleClass="mr" actionListener="#{bookListController.showEdit}" title="#{msg.edit_book}" update=":imagePanel :formEditBook :formUploadImage :formUploadPdf" rendered="#{request.isUserInRole('admin')}">
+                            <p:commandLink styleClass="mr" actionListener="#{bookListController.showEditDialog}" title="#{msg.edit_book}" update=":imagePanel :formEditBook :formUploadImage :formUploadPdf" rendered="#{request.isUserInRole('admin')}">
                                 <p class="edit">#{msg.edit}</p>
                                 <f:setPropertyActionListener value="#{b}" target="#{bookListController.selectedBook}" />  
                             </p:commandLink> 

@@ -2,7 +2,6 @@ package dao.impls;
 
 import dao.interfaces.CommonServiceInterface;
 import entity.HibernateUtil;
-
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;

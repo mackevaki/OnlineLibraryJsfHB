@@ -1,9 +1,6 @@
 package entity;
 
 import jakarta.persistence.*;
-import java.io.Serializable;
-import java.util.Arrays;
-
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -12,14 +9,14 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.SelectBeforeUpdate;
 
+import java.io.Serializable;
+
 @Entity(name = "book")
-//@NoArgsConstructor
-//@AllArgsConstructor
 @RequiredArgsConstructor
 @Getter @Setter
-@DynamicUpdate // обновляет только те поля, которые изменились
-@DynamicInsert // вставляет только те поля, у которых есть значение
-@SelectBeforeUpdate // проверить объект перед обновлением, нужно ли его обновлять
+@DynamicUpdate
+@DynamicInsert
+@SelectBeforeUpdate
 @EqualsAndHashCode(of = "id")
 public class Book implements Serializable{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
